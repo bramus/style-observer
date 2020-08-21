@@ -29,31 +29,28 @@ Note: only unitless numeric values (like `0.4`) are supported. It won't work wit
 
 `npm install css-variable-observer --save`
 
-### Vanilla JS (CommonJS)
+
 ```js
+// Vanilla JS (CommonJS)
 const CSSVariableObserver = require('css-variable-observer');
 
-const cssVariableObserver = new CSSVariableObserver(['--variable1', '--variable2'],
-    (variables) => console.log(variables['--variable1'], variables['--variable2']));
-cssVariableObserver.attach(document.body);
-```
-
-### Vanilla JS (ES6)
-```js
+// Vanilla JS (ES6)
 import CSSVariableObserver from 'css-variable-observer';
 
-const cssVariableObserver = new CSSVariableObserver(['--variable1', '--variable2'],
-    (variables) => console.log(variables['--variable1'], variables['--variable2']));
-cssVariableObserver.attach(document.body);
-```
-
-### TypeScript
-```typescript
+// TypeScript
 import CSSVariableObserver from 'css-variable-observer/src/index.ts'
 
-const cssVariableObserver = new CSSVariableObserver(['--variable1', '--variable2'],
-    (variables) => console.log(variables['--variable1'], variables['--variable2']));
-cssVariableObserver.attach(document.body);
+const cssVariableObserver = new CSSVariableObserver(
+        ['--variable1', '--variable2'],     /* CSS Variables to observe */
+        (variables) => {                    /* This is called when there are changed */
+            console.log(variables['--variable1'], variables['--variable2']);
+        }                               
+    );
+cssVariableObserver.attach(document.body);  /* Attach observer */
+
+//...
+
+cssVariableObserver.detach();               /* Detach observer */
 ```
 
 ## Local Development
