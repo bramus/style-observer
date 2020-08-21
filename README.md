@@ -1,5 +1,11 @@
 # CSS Variable Observer
 
+Zero-dependency, tiny (~800B) CSS variable (custom property) observer
+
+![npm](https://img.shields.io/npm/v/css-variable-observer)
+![npm bundle size](https://img.shields.io/bundlephobia/minzip/css-variable-observer)
+![NPM](https://img.shields.io/npm/l/css-variable-observer)
+
 ## Problem
 
 While CSS variables (a.k.a. [CSS custom properties](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties) are 
@@ -15,8 +21,7 @@ Not to mention that it's not possible to observe CSS variable from the JavaScrip
 This tiny library addresses both problems. It allows you to set up an observer that will track specified
 CSS variables and retrieve their final computed values.
 
-There is a catch though: only unitless numeric values (like `0.4`) are supported. It won't work with colors or  
-percentages. 
+There is a catch though: only unitless numeric values (like `0.4`) are supported. It won't work with colors or percentages. 
 
 ## Usage
 
@@ -32,7 +37,7 @@ cssVariableObserver.attach(document.body);
 ```
 
 ### Vanilla JS (ES6)
-```ecmascript 6
+```js
 import CSSVariableObserver from 'css-variable-observer';
 
 const cssVariableObserver = new CSSVariableObserver(['--variable1', '--variable2'],

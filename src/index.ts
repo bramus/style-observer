@@ -84,44 +84,37 @@ export class CSSVariableObserver {
     }
   }
 
-  /**
+  /*
    * Actual element that senses when values of CSS variables are changed.
-   * @private
    */
   private _sensor: HTMLElement;
 
-  /**
+  /*
    * Observer CSS variables and their iternal identifiers.
-   * @private
    */
   private _observedVariables: Record<string, string>;
 
-  /**
+  /*
    * User supplied callback that receives CSS variable values.
-   * @private
    */
   private _callback: CssVariableObserverCallback;
 
-  /**
+  /*
    * Event handler that is used to invoke callback.
-   * @private
    */
   private _eventHandler = this._handleUpdate.bind(this);
 
-  /**
+  /*
    * Observer state
-   * @private
    */
   private _attached = false;
 
-  /**
+  /*
    * Setup observer sensor.
    *
    * In order to detect changes, `font-variation-settings` property is used. This property accepts
    * list of variation identifiers and their numeric values, which allows to observe any number of
    * CSS variables.
-   *
-   * @private
    */
   private _createSensor(): HTMLElement {
     const sensor = document.createElement('div');
@@ -140,9 +133,8 @@ export class CSSVariableObserver {
     return sensor;
   }
 
-  /**
+  /*
    * Collect CSS variable values and invoke callback.
-   * @private
    */
   private _handleUpdate(): void {
     if (this._attached) {
@@ -180,6 +172,9 @@ export class CSSVariableObserver {
 
 declare global {
   interface CSSStyleDeclaration {
+    /*
+     * Missing field
+     */
     fontVariationSettings?: string;
   }
 }
