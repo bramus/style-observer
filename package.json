@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.1.0-alpha1",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -11,10 +11,11 @@
     "node": ">=10"
   },
   "scripts": {
+    "demo": "concurrently \"npm:start\" \"npm:serve\"",
+    "serve": "http-server -o /demo/",
     "start": "tsdx watch",
     "build": "tsdx build",
-    "test": "tsdx test",
-    "lint": "tsdx lint",
+    "lint": "tsdx lint src",
     "prepare": "tsdx build"
   },
   "peerDependencies": {},
@@ -33,6 +34,8 @@
   "author": "Artem Godin",
   "module": "dist/css-variable-observer.esm.js",
   "devDependencies": {
+    "concurrently": "^5.3.0",
+    "http-server": "^0.12.3",
     "husky": "^4.2.5",
     "tsdx": "^0.13.2",
     "tslib": "^2.0.1",
