@@ -21,7 +21,9 @@ Not to mention that it's not possible to observe CSS variable from the JavaScrip
 This tiny library addresses both problems. It allows you to set up an observer that will track specified
 CSS variables and retrieve their final computed values.
 
-There is a catch though: only unitless numeric values (like `0.4`) are supported. It won't work with colors or percentages. 
+![Demo](demo/demo.gif)
+
+Note: only unitless numeric values (like `0.4`) are supported. It won't work with colors or percentages. 
 
 ## Usage
 
@@ -47,7 +49,7 @@ cssVariableObserver.attach(document.body);
 
 ### TypeScript
 ```typescript
-import CSSVariableObserver from `css-variable-observer/src/index.ts`
+import CSSVariableObserver from 'css-variable-observer/src/index.ts'
 
 const cssVariableObserver = new CSSVariableObserver(['--variable1', '--variable2'],
     (variables) => console.log(variables['--variable1'], variables['--variable2']));
