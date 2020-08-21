@@ -8,7 +8,7 @@ Zero-dependency, tiny (~800B) CSS variable (custom property) observer
 
 ## Problem
 
-While CSS variables (a.k.a. [CSS custom properties](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties) are 
+While CSS variables (a.k.a. [CSS custom properties](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties)) are 
 very powerful, their integration with JavaScript is very limited: you can set it with `element.style.setProperty()`
 or retrieve expanded value with `getComputedStyle(element).getProperty()`. Moreover, if you add `calc()` to the mix
 (why else would you use CSS variables otherwise), you'll quickly notice that `getProperty()` doesn't returns computed
