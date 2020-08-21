@@ -21,7 +21,7 @@ Not to mention that it's not possible to observe CSS variable from the JavaScrip
 This tiny library addresses both problems. It allows you to set up an observer that will track specified
 CSS variables and retrieve their final computed values.
 
-![Demo](demo/demo.gif)
+![Demo](demo/demo.gif?a)
 
 Note: only unitless numeric values (like `0.4`) are supported. It won't work with colors or percentages. 
 
