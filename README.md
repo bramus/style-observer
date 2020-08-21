@@ -42,7 +42,7 @@ import CSSVariableObserver from 'css-variable-observer/src/index.ts'
 
 const cssVariableObserver = new CSSVariableObserver(
         ['--variable1', '--variable2'],     /* CSS Variables to observe */
-        (variables) => {                    /* This is called when there are changed */
+        (variables) => {                    /* This is called whenever there are changes */
             console.log(variables['--variable1'], variables['--variable2']);
         }                               
     );
