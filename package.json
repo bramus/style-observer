@@ -18,12 +18,6 @@
     "lint": "tsdx lint src",
     "prepare": "tsdx build"
   },
-  "peerDependencies": {},
-  "husky": {
-    "hooks": {
-      "pre-commit": "tsdx lint"
-    }
-  },
   "prettier": {
     "printWidth": 80,
     "semi": true,
@@ -34,12 +28,12 @@
   "author": "Artem Godin",
   "module": "dist/css-variable-observer.esm.js",
   "devDependencies": {
-    "concurrently": "^5.3.0",
-    "http-server": "^0.12.3",
-    "husky": "^4.2.5",
-    "tsdx": "^0.13.2",
-    "tslib": "^2.0.1",
-    "typescript": "^4.0.2"
+    "concurrently": "^8.2.2",
+    "http-server": "^14.1.1",
+    "husky": "^9.1.5",
+    "tsdx": "^0.14.1",
+    "tslib": "^2.7.0",
+    "typescript": "^5.5.4"
   },
   "bugs": {
     "url": "https://github.com/fluorumlabs/css-variable-observer/issues"
