@@ -1,41 +1,37 @@
 /**
- * Structure holding CSS variable values. Example:
+ * Structure holding CSS computed values. Example:
  *
  * ```json
  * {
  *     "--my-variable": "1.0",
- *     "--my-other-variable": "2.0"
+ *     "display": "block"
  * }
  * ```
  */
-export type CssVariables = { [key: string]: string };
+export type CSSDeclarations = { [key: string]: string };
 
 /**
  * Type signature of observer callback.
  *
- * @param values Readonly structure containing observed CSS variables and their values.
+ * @param values Readonly structure containing observed CSS properties and their values
  */
-export type CssVariableObserverCallback = (
-  values: Readonly<CssVariables>
+export type CSSStyleObserverCallback = (
+  values: Readonly<CSSDeclarations>
 ) => void;
 
 /**
- * Passive observer for numeric CSS variables. Instead of typical polling approach, it uses CSS
+ * Passive observer for CSS properties. Instead of typical polling approach, it uses CSS
  * transitions to detect changes.
  *
- * CSSVariableObserver can be used to build dynamic theming system, detect media etc.
+ * CSSStyleObserver can be used to build dynamic theming system, detect media etc.
  *
  * Usage:
  * ```javascript
- * const cssVariableObserver = new CSSVariableObserver(['--my-variable'], (variables) => console.log("Value:",variables['--my-variable']));
- * cssVariableObserver.attach(document.body);
+ * const cssStyleObserver = new CSSStyleObserver(['--my-variable'], (variables) => console.log("Value:",variables['--my-variable']));
+ * cssStyleObserver.attach(document.body);
  * ```
- *
- * Note: Only unitless numeric values are supported. If any of observed variables have non-numeric value,
- * the callback won't be invoked. The good news is: once the bad value is fixed, the observer will start
- * to work again.
  */
-export class CSSVariableObserver {
+export class CSSStyleObserver {
   /**
    * Create a new (detached) instance of CSS variable observer.
    *
@@ -44,26 +40,23 @@ export class CSSVariableObserver {
    */
   constructor(
     observedVariables: string[],
-    callback: CssVariableObserverCallback
+    callback: CSSStyleObserverCallback
   ) {
     this._observedVariables = observedVariables;
     this._callback = callback;
-    this._sensor = this._createSensor();
+    this._targetElement = null;
   }
 
   /**
-   * Attach observer to target element. Values of CSS variables will be scoped to this element.
-   *
-   * Callback will be invoked immediately with the current assigne values.
+   * Attach observer to target element. Callback will be invoked immediately with the current assigned values.
    *
    * @param targetElement target element
    */
   attach(targetElement: HTMLElement): void {
-    if (!this._attached) {
-      this._sensor.addEventListener('transitionstart', this._eventHandler);
-      targetElement.appendChild(this._sensor);
-      this._attached = true;
-
+    if (!this._targetElement) {
+      this._targetElement = targetElement;
+      this._setTargetElementStyles(this._targetElement);
+      this._targetElement.addEventListener('transitionstart', this._eventHandler);
       this._handleUpdate();
     }
   }
@@ -72,19 +65,12 @@ export class CSSVariableObserver {
    * Detach observer.
    */
   detach(): void {
-    if (this._attached) {
-      this._sensor.removeEventListener('transitionstart', this._eventHandler);
-      if (this._sensor.parentElement) {
-        this._sensor.parentElement.removeChild(this._sensor);
-      }
-      this._attached = false;
+    if (this._targetElement) {
+      this._unsetTargetElementStyles(this._targetElement);
+      this._targetElement.removeEventListener('transitionstart', this._eventHandler);
+      this._targetElement = null;
     }
   }
-
-  /*
-   * Actual element that senses when values of CSS variables are changed.
-   */
-  private _sensor: HTMLElement;
 
   /*
    * Observer CSS variables and their iternal identifiers.
@@ -94,7 +80,7 @@ export class CSSVariableObserver {
   /*
    * User supplied callback that receives CSS variable values.
    */
-  private _callback: CssVariableObserverCallback;
+  private _callback: CSSStyleObserverCallback;
 
   /*
    * Event handler that is used to invoke callback.
@@ -102,43 +88,44 @@ export class CSSVariableObserver {
   private _eventHandler = this._handleUpdate.bind(this);
 
   /*
-   * Observer state
+   * The element that is being observed
    */
-  private _attached = false;
+  private _targetElement: HTMLElement | null;
 
-  /*
-   * Setup observer sensor.
-   *
-   * In order to detect changes, `font-variation-settings` property is used. This property accepts
-   * list of variation identifiers and their numeric values, which allows to observe any number of
-   * CSS variables.
+  /**
+   * Attach the styles necessary to track the changes to the given element
+   * 
+   * @param targetElement The element to track
    */
-  private _createSensor(): HTMLElement {
-    const sensor = document.createElement('div');
+  private _setTargetElementStyles(targetElement: HTMLElement): void {
     const cssTransitionValue = this._observedVariables
       .map(value => `${value} 0.001ms step-start`)
       .join(', ');
 
-    sensor.style.cssText =
-      'position: absolute; ' +
-      'width: 0; ' +
-      'height: 0; ' +
-      'overflow: hidden; ' +
-      'z-index: -1; ' +
-      'visibility: hidden; ' +
-      'transition: ' + cssTransitionValue + ';' +
-      'transition-behavior: allow-discrete; '
-    return sensor;
+    // @TODO: Don’t overwrite the existing transition
+    targetElement.style.setProperty('transition', cssTransitionValue);
+    targetElement.style.setProperty('transition-behavior', 'allow-discrete');
   }
 
-  /*
+  /**
+   * Remove the styles that track the property changes
+   * 
+   * @param targetElement The element to track
+   */
+  private _unsetTargetElementStyles(targetElement: HTMLElement): void {
+    // @TODO: Don’t remove all, only remove the tracked variables
+    targetElement.style.removeProperty('transition');
+    targetElement.style.removeProperty('transition-behavior');
+  }
+
+  /**
    * Collect CSS variable values and invoke callback.
    */
   private _handleUpdate(): void {
-    if (this._attached) {
-      const computedStyle = getComputedStyle(this._sensor);
+    if (this._targetElement) {
+      const computedStyle = getComputedStyle(this._targetElement);
 
-      const variables: CssVariables = {};
+      const variables: CSSDeclarations = {};
 
       this._observedVariables
         .forEach(value => {
@@ -153,4 +140,4 @@ export class CSSVariableObserver {
   }
 }
 
-export default CSSVariableObserver;
+export default CSSStyleObserver;

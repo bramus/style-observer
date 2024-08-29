@@ -1,5 +1,6 @@
 {
-  "version": "1.0.1",
+  "name": "@bramus/style-observer",
+  "version": "1.0.0",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -16,7 +17,7 @@
     "start": "tsdx watch",
     "build": "tsdx build",
     "lint": "tsdx lint src",
-    "prepare": "tsdx build"
+    "prepublish": "npm run build"
   },
   "prettier": {
     "printWidth": 80,
@@ -24,9 +25,8 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "css-variable-observer",
-  "author": "Artem Godin",
-  "module": "dist/css-variable-observer.esm.js",
+  "author": "Bramus",
+  "module": "dist/style-observer.esm.js",
   "devDependencies": {
     "concurrently": "^8.2.2",
     "http-server": "^14.1.1",
@@ -36,7 +36,7 @@
     "typescript": "^5.5.4"
   },
   "bugs": {
-    "url": "https://github.com/fluorumlabs/css-variable-observer/issues"
+    "url": "https://github.com/bramus/style-observer/issues"
   },
-  "homepage": "https://github.com/fluorumlabs/css-variable-observer"
+  "homepage": "https://github.com/bramus/style-observer"
 }

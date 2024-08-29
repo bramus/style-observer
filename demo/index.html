@@ -6,6 +6,10 @@
       --variable1: 0.5;
     }
 
+    body {
+      border: 1px solid black;
+    }
+
     .computeVariable2 {
       --variable2: calc(var(--variable1, 0) * 10);
     }
@@ -13,29 +17,44 @@
 </head>
 <body>
 <button onclick="randomValue('--variable1')"><code>--variable1: &lt;random number&gt;</code></button>
-<button onclick="randomValue('--variable2')"><code>--variable2: &lt;random number&gt;</code></button>
-<button onclick="randomString('--variable1')"><code>--variable1: &lt;random string&gt;</code></button>
 <button onclick="randomString('--variable2')"><code>--variable2: &lt;random string&gt;</code></button>
-<button onclick="toggleBodyClass('computeVariable2')">Toggle <code>--variable2: calc(var(--variable1, 0) * 10)</code></button>
+<button onclick="toggleDisplay()">Toggle <code>display</code></button>
+<button onclick="toggleBorder()">Toggle <code>border-width</code></button>
 <button onclick="detachObserver()">Detach observer</button>
 <button onclick="attachObserver()">Attach observer</button>
 
 <pre id="result"></pre>
 
 <script type="module">
-    import CSSVariableObserver from '../dist/css-variable-observer.esm.js';
+    import CSSStyleObserver from '../dist/style-observer.esm.js';
 
-    const cssVariableObserver = new CSSVariableObserver(['--variable1', '--variable2'],
+    const cssStyleObserver = new CSSStyleObserver(['--variable1', '--variable2', 'display', 'border-width'],
         (variables) => {
             document.querySelector('#result').textContent = Object.entries(variables).map(value => `${value[0]} = ${value[1]}`).join('\n');
         });
-    cssVariableObserver.attach(document.body);
+    cssStyleObserver.attach(document.body);
 
+    window.toggleDisplay = () => {
+      if (getComputedStyle(document.body).getPropertyValue('display') == 'block') {
+        document.body.style.setProperty('display', 'inline-block');
+      } else {
+        document.body.style.setProperty('display', 'block');
+      }
+    }
+    window.toggleBorder = () => {
+      console.log('toggleBorder');
+      console.log(getComputedStyle(document.body).getPropertyValue('border-width'));
+      if (getComputedStyle(document.body).getPropertyValue('border-width') === '1px') {
+        document.body.style.setProperty('border-width', '10px');
+      } else {
+        document.body.style.setProperty('border-width', '1px');
+      }
+    }
     window.randomValue = (variable) => document.documentElement.style.setProperty(variable, Math.random());
     window.randomString = (variable) => document.documentElement.style.setProperty(variable, window.crypto.randomUUID());
     window.toggleBodyClass = (className) => document.body.classList.toggle(className);
-    window.detachObserver = () => { cssVariableObserver.detach(); document.querySelector('#result').textContent = ''; };
-    window.attachObserver = () => cssVariableObserver.attach(document.body);
+    window.detachObserver = () => { cssStyleObserver.detach(); document.querySelector('#result').textContent = ''; };
+    window.attachObserver = () => cssStyleObserver.attach(document.body);
 </script>
 </body>
 </html>

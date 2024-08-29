@@ -1,56 +1,52 @@
-# CSS Variable Observer
+# CSS Style Observer
 
-Zero-dependency, tiny (~800B) CSS variable (custom property) observer
+MutationObserver for CSS
 
-![npm](https://img.shields.io/npm/v/css-variable-observer)
-![npm bundle size](https://img.shields.io/bundlephobia/minzip/css-variable-observer)
-![NPM](https://img.shields.io/npm/l/css-variable-observer)
+![npm](https://img.shields.io/npm/v/%40bramus/%40bramus%2Fstyle-observer)
+![npm bundle size](https://img.shields.io/bundlejs/size/%40bramus/style-observer)
+![NPM](https://img.shields.io/npm/l/%40bramus/style-observer)
 
-## Problem
+## Style Observer?
 
-While CSS variables (a.k.a. [CSS custom properties](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties)) are 
-very powerful, their integration with JavaScript is very limited: you can set it with `element.style.setProperty()`
-or retrieve expanded value with `getComputedStyle(element).getProperty()`. Moreover, if you add `calc()` to the mix
-(why else would you use CSS variables otherwise), you'll quickly notice that `getProperty()` doesn't returns computed
-value, but an expanded formula.
+While [`MutationObserver`](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver) can track DOM changes, it cannot be used to track style changes. This library plugs that gap and allows you to set up an observer tracking changes in values of CSS Properties.
 
-Not to mention that it's not possible to observe CSS variable from the JavaScript side.
-
-## Solution
-
-This tiny library addresses both problems. It allows you to set up an observer that will track specified
-CSS variables and retrieve their final computed values.
+The main use case for this library is to track changes to [CSS Custom Properties](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties) _(aka CSS Variables)_ but it can be used for other properties as well.
 
 ![Demo](demo/demo-recording.gif)
 
-Note: Does not work in Google Chrome because of https://crbug.com/360159391
+## Installation
+
+```
+npm install @bramus/style-observer
+```
 
 ## Usage
 
-`npm install css-variable-observer --save`
-
-
 ```js
 // Vanilla JS (CommonJS)
-const CSSVariableObserver = require('css-variable-observer');
+const CSSStyleObserver = require('@bramus/style-observer');
 
 // Vanilla JS (ES6)
-import CSSVariableObserver from 'css-variable-observer';
+import CSSStyleObserver from '@bramus/style-observer';
 
 // TypeScript
-import CSSVariableObserver from 'css-variable-observer/src/index.ts'
+import CSSStyleObserver from '@bramus/style-observer/src/index.ts'
 
-const cssVariableObserver = new CSSVariableObserver(
-        ['--variable1', '--variable2'],     /* CSS Variables to observe */
-        (variables) => {                    /* This is called whenever there are changes */
-            console.log(variables['--variable1'], variables['--variable2']);
-        }                               
-    );
-cssVariableObserver.attach(document.body);  /* Attach observer */
+const cssStyleObserver = new CSSStyleObserver(
+    /* CSS Properties to observe */
+    ['--variable1', '--variable2', 'display', 'border-width'],
+
+    /* This is called whenever there are changes */
+    (values) => {
+        console.log(values['--variable1'], values['--variable2'], values['display']);
+    }                               
+);
+
+cssStyleObserver.attach(document.body);  /* Attach observer to `document.body` */
 
 //...
 
-cssVariableObserver.detach();               /* Detach observer */
+cssStyleObserver.detach();               /* Detach observer */
 ```
 
 ## Local Development
@@ -69,3 +65,37 @@ Runs the project in development/watch mode. Your project will be rebuilt upon ch
 
 Bundles the package to the `dist` folder.
 The package is optimized and bundled with Rollup into multiple formats (CommonJS, UMD, and ES Module).
+
+## FAQ
+
+### Browser support?
+
+The requirement for this library to work is support for CSS Transitions.
+
+However, to also support properties that animate discretely – such as Custom Properties but also properties like `display` – the browser **must** support `transition-behavior: allow-discrete`.
+
+In practice, this translates to the following list of browsers:
+
+- Safari 18
+- Firefox 129
+- Google Chrome 117
+
+Note: Google Chrome does not play nice with Custom Properties because of https://crbug.com/360159391
+
+### How is this library better when compared to other libraries?
+
+This library doesn’t use `requestAnimationFrame` but responds to transition events. Therefore it doesn’t put a recurring and constant strain on the main thread.
+
+The original [`css-variable-observer` library](https://github.com/fluorumlabs/css-variable-observer) that coined this approach only works with custom properties and numeric values. This library can work with any property having any value.
+
+### How is this library worse when compared to other libraries?
+
+The properties that are being tracked are set to a very short transition time. If you relied on transitions for those properties, that is now no longer possible.
+
+You can work around this by putting a value into a custom property that you track and then use that custom property in a regular property. The regular property can have any transition you want.
+
+Also note that changing the value `transition` property yourself will make this library no longer work.
+
+## Acknowledgements
+
+This library builds upon [the `css-variable-observer` project by Artem Godin](https://github.com/fluorumlabs/css-variable-observer). The suggestion to leverage `transition-behavior: allow-discrete` was done by [Jake Archibald](https://jakearchibald.com/) in [w3c/csswg-drafts#8982](https://github.com/w3c/csswg-drafts/issues/8982#issuecomment-2317164825).
