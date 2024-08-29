@@ -5,6 +5,7 @@ MutationObserver for CSS
 ![npm](https://img.shields.io/npm/v/%40bramus/%40bramus%2Fstyle-observer)
 ![npm bundle size](https://img.shields.io/bundlejs/size/%40bramus/style-observer)
 ![NPM](https://img.shields.io/npm/l/%40bramus/style-observer)
+[![Demo](https://img.shields.io/badge/demo-_CodePen-blue)](https://codepen.io/bramus/pen/WNqKqxj?editors=1111)
 
 ## Style Observer?
 
@@ -48,6 +49,8 @@ cssStyleObserver.attach(document.body);  /* Attach observer to `document.body` *
 
 cssStyleObserver.detach();               /* Detach observer */
 ```
+
+Try out a demo on CodePen: [https://codepen.io/bramus/pen/WNqKqxj](https://codepen.io/bramus/pen/WNqKqxj?editors=1111)
 
 ## Local Development
 
