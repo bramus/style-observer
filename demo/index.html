@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
   <style>
@@ -13,6 +14,8 @@
 <body>
 <button onclick="randomValue('--variable1')"><code>--variable1: &lt;random number&gt;</code></button>
 <button onclick="randomValue('--variable2')"><code>--variable2: &lt;random number&gt;</code></button>
+<button onclick="randomString('--variable1')"><code>--variable1: &lt;random string&gt;</code></button>
+<button onclick="randomString('--variable2')"><code>--variable2: &lt;random string&gt;</code></button>
 <button onclick="toggleBodyClass('computeVariable2')">Toggle <code>--variable2: calc(var(--variable1, 0) * 10)</code></button>
 <button onclick="detachObserver()">Detach observer</button>
 <button onclick="attachObserver()">Attach observer</button>
@@ -28,7 +31,8 @@
         });
     cssVariableObserver.attach(document.body);
 
-    window.randomValue = (variable) => document.documentElement.style.setProperty(variable, '' + Math.random());
+    window.randomValue = (variable) => document.documentElement.style.setProperty(variable, Math.random());
+    window.randomString = (variable) => document.documentElement.style.setProperty(variable, window.crypto.randomUUID());
     window.toggleBodyClass = (className) => document.body.classList.toggle(className);
     window.detachObserver = () => { cssVariableObserver.detach(); document.querySelector('#result').textContent = ''; };
     window.attachObserver = () => cssVariableObserver.attach(document.body);

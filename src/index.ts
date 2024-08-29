@@ -3,12 +3,12 @@
  *
  * ```json
  * {
- *     "--my-variable": 1.0,
- *     "--my-other-variable": 2.0
+ *     "--my-variable": "1.0",
+ *     "--my-other-variable": "2.0"
  * }
  * ```
  */
-export type CssVariables = { [key: string]: number };
+export type CssVariables = { [key: string]: string };
 
 /**
  * Type signature of observer callback.
@@ -46,10 +46,7 @@ export class CSSVariableObserver {
     observedVariables: string[],
     callback: CssVariableObserverCallback
   ) {
-    this._observedVariables = {};
-    observedVariables.forEach((value, index) => {
-      this._observedVariables[index.toString(36).padStart(4, '!')] = value;
-    });
+    this._observedVariables = observedVariables;
     this._callback = callback;
     this._sensor = this._createSensor();
   }
@@ -92,7 +89,7 @@ export class CSSVariableObserver {
   /*
    * Observer CSS variables and their iternal identifiers.
    */
-  private _observedVariables: Record<string, string>;
+  private _observedVariables: string[];
 
   /*
    * User supplied callback that receives CSS variable values.
@@ -118,6 +115,10 @@ export class CSSVariableObserver {
    */
   private _createSensor(): HTMLElement {
     const sensor = document.createElement('div');
+    const cssTransitionValue = this._observedVariables
+      .map(value => `${value} 0.001ms step-start`)
+      .join(', ');
+
     sensor.style.cssText =
       'position: absolute; ' +
       'width: 0; ' +
@@ -125,11 +126,8 @@ export class CSSVariableObserver {
       'overflow: hidden; ' +
       'z-index: -1; ' +
       'visibility: hidden; ' +
-      'transition: font-variation-settings 0.001ms step-start; ' +
-      'font-variation-settings: ' +
-      Object.entries(this._observedVariables)
-        .map(value => `"${value[0]}" var(${value[1]}, 0)`)
-        .join(', ');
+      'transition: ' + cssTransitionValue + ';' +
+      'transition-behavior: allow-discrete; '
     return sensor;
   }
 
@@ -139,43 +137,19 @@ export class CSSVariableObserver {
   private _handleUpdate(): void {
     if (this._attached) {
       const computedStyle = getComputedStyle(this._sensor);
-      const fontVariationSettings = computedStyle.fontVariationSettings;
 
-      // Check if font-variation-settings are actually present in computed styles
-      if (fontVariationSettings !== undefined) {
-        // This regexp extracts identifier and number from the value of font-variation-settings property
-        const valueRegexp = /"(!{0,3}[0-9a-z]+)" ([+-]?[0-9]*([.]?[0-9]+)?([eE][+-]?[0-9]+)?)/g;
-        const variables: CssVariables = {};
+      const variables: CssVariables = {};
 
-        let match = valueRegexp.exec(fontVariationSettings);
-        while (match) {
-          const variableName = this._observedVariables[match[1]];
-          if (
-            variableName &&
-            computedStyle.getPropertyValue(variableName) !== ''
-          ) {
-            // Only if this CSS variable is defined.
-            variables[variableName] = +match[2];
-          }
+      this._observedVariables
+        .forEach(value => {
+          variables[value] = computedStyle.getPropertyValue(value);
+        });
 
-          match = valueRegexp.exec(fontVariationSettings);
-        }
-
-        // Do not invoke callback if no variables are defined
-        if (Object.keys(variables).length > 0) {
-          this._callback(variables);
-        }
+      // Do not invoke callback if no variables are defined
+      if (Object.keys(variables).length > 0) {
+        this._callback(variables);
       }
     }
-  }
-}
-
-declare global {
-  interface CSSStyleDeclaration {
-    /*
-     * Missing field
-     */
-    fontVariationSettings?: string;
   }
 }
 

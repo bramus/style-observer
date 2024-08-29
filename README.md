@@ -23,7 +23,7 @@ CSS variables and retrieve their final computed values.
 
 ![Demo](demo/demo-recording.gif)
 
-Note: only unitless numeric values (like `0.4`) are supported. It won't work with colors or percentages. 
+Note: Does not work in Google Chrome because of https://crbug.com/360159391
 
 ## Usage
 
