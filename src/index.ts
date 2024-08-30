@@ -37,14 +37,17 @@ export class CSSStyleObserver {
    *
    * @param observedVariables list of CSS variables to observe
    * @param callback callback that will be invoked every time any of listed CSS variables change
+   * @param selectiveMode flag to pass only the changed property to the callback
    */
   constructor(
     observedVariables: string[],
-    callback: CSSStyleObserverCallback
+    callback: CSSStyleObserverCallback,
+    selectiveMode: boolean = false
   ) {
     this._observedVariables = observedVariables;
     this._callback = callback;
     this._targetElement = null;
+    this._selectiveMode = selectiveMode;
   }
 
   /**
@@ -73,7 +76,7 @@ export class CSSStyleObserver {
   }
 
   /*
-   * Observer CSS variables and their iternal identifiers.
+   * Observer CSS variables and their internal identifiers.
    */
   private _observedVariables: string[];
 
@@ -91,6 +94,11 @@ export class CSSStyleObserver {
    * The element that is being observed
    */
   private _targetElement: HTMLElement | null;
+
+  /*
+   * Flag for selective mode
+   */
+  private _selectiveMode: boolean;
 
   /**
    * Attach the styles necessary to track the changes to the given element
@@ -121,16 +129,22 @@ export class CSSStyleObserver {
   /**
    * Collect CSS variable values and invoke callback.
    */
-  private _handleUpdate(): void {
+  private _handleUpdate(event?: TransitionEvent): void {
     if (this._targetElement) {
       const computedStyle = getComputedStyle(this._targetElement);
-
       const variables: CSSDeclarations = {};
 
+      if (this._selectiveMode && event && event.propertyName) {
+        const changedProperty = event.propertyName;
+        if (this._observedVariables.includes(changedProperty)) {
+          variables[changedProperty] = computedStyle.getPropertyValue(changedProperty);
+        }
+      } else {
       this._observedVariables
         .forEach(value => {
           variables[value] = computedStyle.getPropertyValue(value);
         });
+      }
 
       // Do not invoke callback if no variables are defined
       if (Object.keys(variables).length > 0) {
