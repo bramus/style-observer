@@ -20,6 +20,21 @@ export type CSSStyleObserverCallback = (
 ) => void;
 
 /**
+ * Enum for callback modes
+ */
+export enum CallbackMode {
+  ALL = 'all',
+  INDIVIDUAL = 'individual'
+}
+
+/**
+ * Options for configuring the CSSStyleObserver
+ */
+export interface CSSStyleObserverOptions {
+  callbackMode?: CallbackMode;
+}
+
+/**
  * Passive observer for CSS properties. Instead of typical polling approach, it uses CSS
  * transitions to detect changes.
  *
@@ -37,18 +52,19 @@ export class CSSStyleObserver {
    *
    * @param observedVariables list of CSS variables to observe
    * @param callback callback that will be invoked every time any of listed CSS variables change
-   * @param selectiveMode flag to pass only the changed property to the callback
+   * @param options configuration options
    */
   constructor(
     observedVariables: string[],
     callback: CSSStyleObserverCallback,
-    selectiveMode: boolean = false
+    options: CSSStyleObserverOptions = {}
   ) {
     this._observedVariables = observedVariables;
     this._callback = callback;
     this._targetElement = null;
-    this._selectiveMode = selectiveMode;
-  }
+    this._callbackMode = options.callbackMode && Object.values(CallbackMode).includes(options.callbackMode) 
+    ? options.callbackMode 
+    : CallbackMode.INDIVIDUAL;  }
 
   /**
    * Attach observer to target element. Callback will be invoked immediately with the current assigned values.
@@ -96,9 +112,9 @@ export class CSSStyleObserver {
   private _targetElement: HTMLElement | null;
 
   /*
-   * Flag for selective mode
+   * Mode for the callback to decide what to pass
    */
-  private _selectiveMode: boolean;
+  private _callbackMode: CallbackMode;
 
   /**
    * Attach the styles necessary to track the changes to the given element
@@ -134,14 +150,13 @@ export class CSSStyleObserver {
       const computedStyle = getComputedStyle(this._targetElement);
       const variables: CSSDeclarations = {};
 
-      if (this._selectiveMode && event && event.propertyName) {
+      if (this._callbackMode === CallbackMode.INDIVIDUAL && event?.propertyName) {
         const changedProperty = event.propertyName;
         if (this._observedVariables.includes(changedProperty)) {
           variables[changedProperty] = computedStyle.getPropertyValue(changedProperty);
         }
       } else {
-      this._observedVariables
-        .forEach(value => {
+        this._observedVariables.forEach(value => {
           variables[value] = computedStyle.getPropertyValue(value);
         });
       }
