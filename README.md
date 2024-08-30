@@ -28,10 +28,10 @@ npm install @bramus/style-observer
 const CSSStyleObserver = require('@bramus/style-observer');
 
 // Vanilla JS (ES6)
-import CSSStyleObserver from '@bramus/style-observer';
+import CSSStyleObserver, { CallbackMode } from '@bramus/style-observer';
 
 // TypeScript
-import CSSStyleObserver from '@bramus/style-observer/src/index.ts'
+import CSSStyleObserver, { CallbackMode } from '@bramus/style-observer/src/index.ts'
 
 const cssStyleObserver = new CSSStyleObserver(
     /* CSS Properties to observe */
@@ -40,7 +40,10 @@ const cssStyleObserver = new CSSStyleObserver(
     /* This is called whenever there are changes */
     (values) => {
         console.log(values['--variable1'], values['--variable2'], values['display']);
-    }                               
+    },                               
+
+    /* options */
+    { callbackMode: CallbackMode.INDIVIDUAL } // Set the callback mode to 'individual' or 'all'
 );
 
 cssStyleObserver.attach(document.body);  /* Attach observer to `document.body` */
@@ -49,6 +52,13 @@ cssStyleObserver.attach(document.body);  /* Attach observer to `document.body` *
 
 cssStyleObserver.detach();               /* Detach observer */
 ```
+
+### Callback Modes
+
+The CSSStyleObserver supports different modes for invoking the callback, specified via the callbackMode option in the options object:
+
+* CallbackMode.INDIVIDUAL: Only the changed property is passed to the callback function
+* CallbackMode.ALL: All observed properties are passed to the callback function, regardless of whether they changed or not
 
 Try out a demo on CodePen: [https://codepen.io/bramus/pen/WNqKqxj](https://codepen.io/bramus/pen/WNqKqxj?editors=1111)
 
