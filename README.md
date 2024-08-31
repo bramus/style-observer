@@ -24,14 +24,8 @@ npm install @bramus/style-observer
 ## Usage
 
 ```js
-// Vanilla JS (CommonJS)
-const CSSStyleObserver = require('@bramus/style-observer');
-
-// Vanilla JS (ES6)
-import CSSStyleObserver from '@bramus/style-observer';
-
-// TypeScript
-import CSSStyleObserver from '@bramus/style-observer/src/index.ts'
+// Vanilla JS (ES6) (also works with TypeScript)
+import CSSStyleObserver from './node_modules/@bramus/style-observer/src/index.js';
 
 const cssStyleObserver = new CSSStyleObserver(
     /* CSS Properties to observe */

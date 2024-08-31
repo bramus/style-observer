@@ -1,11 +1,10 @@
 {
   "name": "@bramus/style-observer",
   "version": "1.0.0",
+  "type": "module",
   "license": "MIT",
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
+  "main": "src/index.js",
   "files": [
-    "dist",
     "src"
   ],
   "engines": {
@@ -14,8 +13,8 @@
   "scripts": {
     "demo": "concurrently \"npm:start\" \"npm:serve\"",
     "serve": "http-server -o /demo/",
-    "start": "tsdx watch",
-    "build": "tsdx build",
+    "start": "tsc --watch",
+    "build": "tsc",
     "lint": "tsdx lint src",
     "prepublish": "npm run build"
   },
@@ -26,7 +25,6 @@
     "trailingComma": "es5"
   },
   "author": "Bramus",
-  "module": "dist/style-observer.esm.js",
   "devDependencies": {
     "concurrently": "^8.2.2",
     "http-server": "^14.1.1",
