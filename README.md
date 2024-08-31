@@ -53,6 +53,8 @@ cssStyleObserver.attach(document.body);  /* Attach observer to `document.body` *
 cssStyleObserver.detach();               /* Detach observer */
 ```
 
+Try out a demo on CodePen: [https://codepen.io/bramus/pen/WNqKqxj](https://codepen.io/bramus/pen/WNqKqxj?editors=1111)
+
 ### Callback Modes
 
 The `CSSStyleObserver` supports different modes for invoking the callback, specified via the `callbackMode` option in the `options` object:
@@ -61,7 +63,6 @@ The `CSSStyleObserver` supports different modes for invoking the callback, speci
 * `CallbackMode.ALL`: All observed properties are passed to the callback function, regardless of whether they changed or not
 
 The default mode used is `CallbackMode.INDIVIDUAL`
-Try out a demo on CodePen: [https://codepen.io/bramus/pen/WNqKqxj](https://codepen.io/bramus/pen/WNqKqxj?editors=1111)
 
 ## Local Development
 
