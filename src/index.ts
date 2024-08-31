@@ -175,7 +175,7 @@ export class CSSStyleObserver {
       const handler = this.modeHandlers[this._callbackMode] ?? this.modeHandlers[CallbackMode.INDIVIDUAL];
       handler(computedStyle, variables, propertyName);
 
-      // Invoke the callback if there are any variables
+      // Do not invoke callback if no variables are defined
       if (Object.keys(variables).length > 0) {
       this._callback(variables);
     }
