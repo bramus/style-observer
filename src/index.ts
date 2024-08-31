@@ -177,9 +177,9 @@ export class CSSStyleObserver {
 
       // Do not invoke callback if no variables are defined
       if (Object.keys(variables).length > 0) {
-      this._callback(variables);
+        this._callback(variables);
+      }
     }
-  }
   }
 }
 
