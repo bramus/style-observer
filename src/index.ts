@@ -62,9 +62,8 @@ export class CSSStyleObserver {
     this._observedVariables = observedVariables;
     this._callback = callback;
     this._targetElement = null;
-    this._callbackMode = options.callbackMode && Object.values(CallbackMode).includes(options.callbackMode) 
-    ? options.callbackMode 
-    : CallbackMode.INDIVIDUAL;  }
+    this._callbackMode = options.callbackMode ?? CallbackMode.INDIVIDUAL;
+  }
 
   /**
    * Attach observer to target element. Callback will be invoked immediately with the current assigned values.
@@ -142,30 +141,45 @@ export class CSSStyleObserver {
     targetElement.style.removeProperty('transition-behavior');
   }
 
+  private modeHandlers: Record<CallbackMode, (computedStyle: CSSStyleDeclaration, variables: CSSDeclarations, propertyName?: string) => void> = {
+    [CallbackMode.ALL]: (computedStyle, variables) => {
+      this._observedVariables.forEach(value => {
+        variables[value] = computedStyle.getPropertyValue(value);
+      });
+    },
+    [CallbackMode.INDIVIDUAL]: (computedStyle, variables, propertyName) => {
+      if (propertyName) {
+        variables[propertyName] = computedStyle.getPropertyValue(propertyName);
+      }
+    }
+    // Additional modes
+  };
+
   /**
    * Collect CSS variable values and invoke callback.
    */
   private _handleUpdate(event?: TransitionEvent): void {
     if (this._targetElement) {
+      const propertyName = event?.propertyName;
+
+      // Early return if the property is given but not observed
+      if (propertyName && !this._observedVariables.includes(propertyName)) {
+        return;
+      }
+
       const computedStyle = getComputedStyle(this._targetElement);
+
       const variables: CSSDeclarations = {};
 
-      if (this._callbackMode === CallbackMode.INDIVIDUAL && event?.propertyName) {
-        const changedProperty = event.propertyName;
-        if (this._observedVariables.includes(changedProperty)) {
-          variables[changedProperty] = computedStyle.getPropertyValue(changedProperty);
-        }
-      } else {
-        this._observedVariables.forEach(value => {
-          variables[value] = computedStyle.getPropertyValue(value);
-        });
-      }
+      // Execute the handler for the current mode, default to CallbackMode.INDIVIDUAL if not valid
+      const handler = this.modeHandlers[this._callbackMode] ?? this.modeHandlers[CallbackMode.INDIVIDUAL];
+      handler(computedStyle, variables, propertyName);
 
-      // Do not invoke callback if no variables are defined
+      // Invoke the callback if there are any variables
       if (Object.keys(variables).length > 0) {
-        this._callback(variables);
-      }
+      this._callback(variables);
     }
+  }
   }
 }
 
