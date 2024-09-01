@@ -25,7 +25,7 @@ npm install @bramus/style-observer
 
 ```js
 // Vanilla JS (ES6) (also works with TypeScript)
-import CSSStyleObserver from './node_modules/@bramus/style-observer/src/index.js';
+import CSSStyleObserver from '@bramus/style-observer';
 
 const cssStyleObserver = new CSSStyleObserver(
     /* CSS Properties to observe */
@@ -42,6 +42,18 @@ cssStyleObserver.attach(document.body);  /* Attach observer to `document.body` *
 //...
 
 cssStyleObserver.detach();               /* Detach observer */
+```
+
+Provide [import maps](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules#importing_modules_using_import_maps):
+
+```html
+<script type="importmap">
+    {
+        "imports": {
+            "@bramus/style-observer": "./node_modules/@bramus/style-observer/src/index.js"
+        }
+    }
+</script>
 ```
 
 Try out a demo on CodePen: [https://codepen.io/bramus/pen/WNqKqxj](https://codepen.io/bramus/pen/WNqKqxj?editors=1111)
