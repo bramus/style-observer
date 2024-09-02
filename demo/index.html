@@ -41,12 +41,14 @@
         document.body.style.setProperty('display', 'block');
       }
     }
+    let borderIsToggled = false;
     window.toggleBorder = () => {
-      if (getComputedStyle(document.body).getPropertyValue('border-width') === '1px') {
+      if (borderIsToggled === false) {
         document.body.style.setProperty('border-width', '10px');
       } else {
         document.body.style.setProperty('border-width', '1px');
       }
+      borderIsToggled = !borderIsToggled;
     }
     window.randomValue = (variable) => document.documentElement.style.setProperty(variable, Math.random());
     window.randomString = (variable) => document.documentElement.style.setProperty(variable, window.crypto.randomUUID());
