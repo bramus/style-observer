@@ -1,22 +1,29 @@
 /**
- * Structure holding CSS computed values. Example:
+ * Structure holding detailed CSS computed values. Example:
  *
  * ```json
  * {
- *     "--my-variable": "1.0",
- *     "display": "block"
+ *     "propertyName": "--my-variable",
+ *     "value": "1.0",
+ *     "previousValue": "0.5",
+ *     "changed": true
  * }
  * ```
  */
-export type CSSDeclarations = { [key: string]: string };
+export type CSSDeclarations = {
+  propertyName: string;
+  value: string;
+  previousValue: string;
+  changed: boolean;
+};
 
 /**
  * Type signature of observer callback.
  *
- * @param values Readonly structure containing observed CSS properties and their values
+ * @param values Readonly Array containing details of observed CSS properties and their change status
  */
 export type CSSStyleObserverCallback = (
-  values: Readonly<CSSDeclarations>
+  values: ReadonlyArray<CSSDeclarations>
 ) => void;
 
 /**
@@ -45,6 +52,7 @@ export class CSSStyleObserver {
     this._observedVariables = observedVariables;
     this._callback = callback;
     this._targetElement = null;
+    this._cachedValues = {};
   }
 
   /**
@@ -73,7 +81,7 @@ export class CSSStyleObserver {
   }
 
   /*
-   * Observer CSS variables and their iternal identifiers.
+   * Observer CSS variables and their internal identifiers.
    */
   private _observedVariables: string[];
 
@@ -91,6 +99,11 @@ export class CSSStyleObserver {
    * The element that is being observed
    */
   private _targetElement: HTMLElement | null;
+
+  /*
+   * Cache to store previous values of observed properties
+   */
+  private _cachedValues: { [key: string]: string };
 
   /**
    * Attach the styles necessary to track the changes to the given element
@@ -124,17 +137,28 @@ export class CSSStyleObserver {
   private _handleUpdate(): void {
     if (this._targetElement) {
       const computedStyle = getComputedStyle(this._targetElement);
-
-      const variables: CSSDeclarations = {};
-
-      this._observedVariables
-        .forEach(value => {
-          variables[value] = computedStyle.getPropertyValue(value);
+  
+      const results: CSSDeclarations[] = [];
+  
+      this._observedVariables.forEach(propertyName => {
+        const currentValue = computedStyle.getPropertyValue(propertyName);
+        const previousValue = this._cachedValues[propertyName] || '';
+  
+        const changed = currentValue !== previousValue;
+  
+        results.push({
+          propertyName,
+          value: currentValue,
+          previousValue,
+          changed
         });
-
-      // Do not invoke callback if no variables are defined
-      if (Object.keys(variables).length > 0) {
-        this._callback(variables);
+  
+        this._cachedValues[propertyName] = currentValue;
+      });
+  
+      // Invoke the callback only if there are changes
+      if (results.some(detail => detail.changed)) {
+        this._callback(results);
       }
     }
   }
