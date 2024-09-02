@@ -2,16 +2,18 @@
 <html>
 <head>
   <style>
+    @property --variable1 {
+      syntax: "<number>";
+      inherits: true;
+      initial-value: 0;
+    }
+
     :root {
       --variable1: 0.5;
     }
 
     body {
       border: 1px solid black;
-    }
-
-    .computeVariable2 {
-      --variable2: calc(var(--variable1, 0) * 10);
     }
   </style>
 </head>
