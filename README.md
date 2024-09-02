@@ -50,6 +50,19 @@ cssStyleObserver.attach(document.body);  /* Attach observer to `document.body` *
 cssStyleObserver.detach();               /* Detach observer */
 ```
 
+### Response Structure
+
+The callback function receives an array of objects with the following structure:
+
+```typescript
+{
+  propertyName: string; /* CSS property being observed */
+  value: string; /* current value of the property */
+  previousValue: string; /* value of the property before the latest change */
+  changed: boolean; /* flag indicating whether the property value has changed since the last observation */
+}
+```
+
 Try out a demo on CodePen: [https://codepen.io/bramus/pen/WNqKqxj](https://codepen.io/bramus/pen/WNqKqxj?editors=1111)
 
 ## Local Development
