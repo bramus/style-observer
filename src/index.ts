@@ -45,6 +45,7 @@ export class CSSStyleObserver {
     this._observedVariables = observedVariables;
     this._callback = callback;
     this._targetElement = null;
+    this._cachedValues = {};
   }
 
   /**
@@ -73,7 +74,7 @@ export class CSSStyleObserver {
   }
 
   /*
-   * Observer CSS variables and their iternal identifiers.
+   * Observer CSS variables and their internal identifiers.
    */
   private _observedVariables: string[];
 
@@ -91,6 +92,11 @@ export class CSSStyleObserver {
    * The element that is being observed
    */
   private _targetElement: HTMLElement | null;
+
+  /*
+   * Cache to store previous values of observed properties
+   */
+  private _cachedValues: { [key: string]: string };
 
   /**
    * Attach the styles necessary to track the changes to the given element
@@ -125,16 +131,21 @@ export class CSSStyleObserver {
     if (this._targetElement) {
       const computedStyle = getComputedStyle(this._targetElement);
 
-      const variables: CSSDeclarations = {};
+      const changedProperties: CSSDeclarations = {};
 
-      this._observedVariables
-        .forEach(value => {
-          variables[value] = computedStyle.getPropertyValue(value);
-        });
+      this._observedVariables.forEach(propertyName => {
+        const currentValue = computedStyle.getPropertyValue(propertyName);
+        const previousValue = this._cachedValues[propertyName] || '';
 
-      // Do not invoke callback if no variables are defined
-      if (Object.keys(variables).length > 0) {
-        this._callback(variables);
+        if (currentValue !== previousValue) {
+          changedProperties[propertyName] = currentValue;
+          this._cachedValues[propertyName] = currentValue;
+        }
+      });
+
+      // Invoke callback only if there are changes
+      if (Object.keys(changedProperties).length > 0) {
+        this._callback(changedProperties);
       }
     }
   }
