@@ -1,29 +1,22 @@
 /**
- * Structure holding detailed CSS computed values. Example:
+ * Structure holding CSS computed values. Example:
  *
  * ```json
  * {
- *     "propertyName": "--my-variable",
- *     "value": "1.0",
- *     "previousValue": "0.5",
- *     "changed": true
+ *     "--my-variable": "1.0",
+ *     "display": "block"
  * }
  * ```
  */
-export type CSSDeclarations = {
-  propertyName: string;
-  value: string;
-  previousValue: string;
-  changed: boolean;
-};
+export type CSSDeclarations = { [key: string]: string };
 
 /**
  * Type signature of observer callback.
  *
- * @param values Readonly Array containing details of observed CSS properties and their change status
+ * @param values Readonly structure containing observed CSS properties and their values
  */
 export type CSSStyleObserverCallback = (
-  values: ReadonlyArray<CSSDeclarations>
+  values: Readonly<CSSDeclarations>
 ) => void;
 
 /**
@@ -52,7 +45,7 @@ export class CSSStyleObserver {
     this._observedVariables = observedVariables;
     this._callback = callback;
     this._targetElement = null;
-    this._cachedValues = {};
+    this._cachedValues = {}; // Add caching mechanism
   }
 
   /**
@@ -137,28 +130,22 @@ export class CSSStyleObserver {
   private _handleUpdate(): void {
     if (this._targetElement) {
       const computedStyle = getComputedStyle(this._targetElement);
-  
-      const results: CSSDeclarations[] = [];
-  
+
+      const changedProperties: CSSDeclarations = {};
+
       this._observedVariables.forEach(propertyName => {
         const currentValue = computedStyle.getPropertyValue(propertyName);
         const previousValue = this._cachedValues[propertyName] || '';
-  
-        const changed = currentValue !== previousValue;
-  
-        results.push({
-          propertyName,
-          value: currentValue,
-          previousValue,
-          changed
-        });
-  
-        this._cachedValues[propertyName] = currentValue;
+
+        if (currentValue !== previousValue) {
+          changedProperties[propertyName] = currentValue;
+          this._cachedValues[propertyName] = currentValue;
+        }
       });
-  
-      // Invoke the callback only if there are changes
-      if (results.some(detail => detail.changed)) {
-        this._callback(results);
+
+      // Invoke callback only if there are changes
+      if (Object.keys(changedProperties).length > 0) {
+        this._callback(changedProperties);
       }
     }
   }
