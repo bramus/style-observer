@@ -45,7 +45,7 @@ export class CSSStyleObserver {
     this._observedVariables = observedVariables;
     this._callback = callback;
     this._targetElement = null;
-    this._cachedValues = {}; // Add caching mechanism
+    this._cachedValues = {};
   }
 
   /**
