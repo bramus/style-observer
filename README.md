@@ -1,15 +1,15 @@
 # CSS Style Observer
 
-MutationObserver for CSS
+MutationObserver for CSS. Get notified when the computed value of a CSS property changes.
 
 ![npm](https://img.shields.io/npm/v/%40bramus%2Fstyle-observer)
 ![npm bundle size](https://img.shields.io/bundlejs/size/%40bramus/style-observer)
 ![NPM](https://img.shields.io/npm/l/%40bramus/style-observer)
-[![Demo](https://img.shields.io/badge/demo-_CodePen-blue)](https://codepen.io/bramus/pen/WNqKqxj?editors=1111)
+[![Demo](https://img.shields.io/badge/demo-_CodePen-hotpink)](https://codepen.io/bramus/pen/WNqKqxj?editors=1111)
 
 ## Style Observer?
 
-While [`MutationObserver`](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver) can track DOM changes, it cannot be used to track style changes. This library plugs that gap and allows you to set up an observer tracking changes in values of CSS Properties.
+While [`MutationObserver`](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver) can track DOM changes, it cannot be used to track style changes. This library plugs that gap and allows you to set up an observer tracking changes in computed values of CSS Properties.
 
 The main use case for this library is to track changes to [CSS Custom Properties](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties) _(aka CSS Variables)_ but it can be used for other properties as well.
 
@@ -83,7 +83,7 @@ In practice, this translates to the following list of browsers:
 - Firefox 129
 - Google Chrome 117
 
-Note: Google Chrome does not play nice with Custom Properties because of https://crbug.com/360159391
+Note: All browser versions listed above have bugs when transitioning Custom Properties. As it stands right now, the only cross-browser way to observe Custom Properties with `@bramus/style-observer` is to register the property with a syntax of `"<custom-ident>"`, which might not be a good fit for your use-case. See [here]([url](https://brm.us/style-observer#custom-props)) for a detailed write-up.
 
 ### How is this library better when compared to other libraries?
 
