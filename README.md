@@ -83,7 +83,7 @@ In practice, this translates to the following list of browsers:
 - Firefox 129
 - Google Chrome 117
 
-Note: All browser versions listed above have bugs when transitioning Custom Properties. As it stands right now, the only cross-browser way to observe Custom Properties with `@bramus/style-observer` is to register the property with a syntax of `"<custom-ident>"`, which might not be a good fit for your use-case. See [here]([url](https://brm.us/style-observer#custom-props)) for a detailed write-up.
+Note: All browser versions listed above have bugs when transitioning Custom Properties. As it stands right now, the only cross-browser way to observe Custom Properties with `@bramus/style-observer` is to register the property with a syntax of `"<custom-ident>"`, which might not be a good fit for your use-case. See [https://brm.us/style-observer#custom-props](https://brm.us/style-observer#custom-props) for a detailed write-up.
 
 ### How is this library better when compared to other libraries?
 
