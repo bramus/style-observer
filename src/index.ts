@@ -20,6 +20,21 @@ export type CSSStyleObserverCallback = (
 ) => void;
 
 /**
+ * Enum for callback modes
+ */
+export enum CallbackMode {
+  ALL = 'all',
+  INDIVIDUAL = 'individual'
+}
+
+/**
+ * Options for configuring the CSSStyleObserver
+ */
+export interface CSSStyleObserverOptions {
+  callbackMode?: CallbackMode;
+}
+
+/**
  * Passive observer for CSS properties. Instead of typical polling approach, it uses CSS
  * transitions to detect changes.
  *
@@ -37,14 +52,17 @@ export class CSSStyleObserver {
    *
    * @param observedVariables list of CSS variables to observe
    * @param callback callback that will be invoked every time any of listed CSS variables change
+   * @param options configuration options
    */
   constructor(
     observedVariables: string[],
-    callback: CSSStyleObserverCallback
+    callback: CSSStyleObserverCallback,
+    options: CSSStyleObserverOptions = {}
   ) {
     this._observedVariables = observedVariables;
     this._callback = callback;
     this._targetElement = null;
+    this._callbackMode = options.callbackMode ?? CallbackMode.INDIVIDUAL;
   }
 
   /**
@@ -73,7 +91,7 @@ export class CSSStyleObserver {
   }
 
   /*
-   * Observer CSS variables and their iternal identifiers.
+   * Observer CSS variables and their internal identifiers.
    */
   private _observedVariables: string[];
 
@@ -91,6 +109,11 @@ export class CSSStyleObserver {
    * The element that is being observed
    */
   private _targetElement: HTMLElement | null;
+
+  /*
+   * Mode for the callback to decide what to pass
+   */
+  private _callbackMode: CallbackMode;
 
   /**
    * Attach the styles necessary to track the changes to the given element
@@ -118,19 +141,39 @@ export class CSSStyleObserver {
     targetElement.style.removeProperty('transition-behavior');
   }
 
+  private modeHandlers: Record<CallbackMode, (computedStyle: CSSStyleDeclaration, variables: CSSDeclarations, propertyName?: string) => void> = {
+    [CallbackMode.ALL]: (computedStyle, variables) => {
+      this._observedVariables.forEach(value => {
+        variables[value] = computedStyle.getPropertyValue(value);
+      });
+    },
+    [CallbackMode.INDIVIDUAL]: (computedStyle, variables, propertyName) => {
+      if (propertyName) {
+        variables[propertyName] = computedStyle.getPropertyValue(propertyName);
+      }
+    }
+    // Additional modes
+  };
+
   /**
    * Collect CSS variable values and invoke callback.
    */
-  private _handleUpdate(): void {
+  private _handleUpdate(event?: TransitionEvent): void {
     if (this._targetElement) {
+      const propertyName = event?.propertyName;
+
+      // Early return if the property is given but not observed
+      if (propertyName && !this._observedVariables.includes(propertyName)) {
+        return;
+      }
+
       const computedStyle = getComputedStyle(this._targetElement);
 
       const variables: CSSDeclarations = {};
 
-      this._observedVariables
-        .forEach(value => {
-          variables[value] = computedStyle.getPropertyValue(value);
-        });
+      // Execute the handler for the current mode, default to CallbackMode.INDIVIDUAL if not valid
+      const handler = this.modeHandlers[this._callbackMode] ?? this.modeHandlers[CallbackMode.INDIVIDUAL];
+      handler(computedStyle, variables, propertyName);
 
       // Do not invoke callback if no variables are defined
       if (Object.keys(variables).length > 0) {
