@@ -40,7 +40,11 @@ const cssStyleObserver = new CSSStyleObserver(
     /* This is called whenever there are changes */
     (values) => {
         console.log(values['--variable1'], values['--variable2'], values['display']);
-    }                               
+    },                                                 
+    /* Configuration options */
+    {
+      observeAllProperties?: boolean
+    }
 );
 
 cssStyleObserver.attach(document.body);  /* Attach observer to `document.body` */
@@ -49,6 +53,10 @@ cssStyleObserver.attach(document.body);  /* Attach observer to `document.body` *
 
 cssStyleObserver.detach();               /* Detach observer */
 ```
+
+### Configuration options
+
+* observeAllProperties (boolean, default: false): Flag to determine whether to observe all properties or only the changed ones
 
 Try out a demo on CodePen: [https://codepen.io/bramus/pen/WNqKqxj](https://codepen.io/bramus/pen/WNqKqxj?editors=1111)
 
