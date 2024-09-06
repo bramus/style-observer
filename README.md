@@ -1,15 +1,15 @@
-# CSS Style Observer
+# `@bramus/style-observer` – MutationObserver for CSS
 
-MutationObserver for CSS. Get notified when the computed value of a CSS property changes.
+[![@bramus/style-observer Logo](https://github.com/bramus/style-observer/raw/main/style-observer.jpg?raw=true)](https://brm.us/style-observer)
 
-![npm](https://img.shields.io/npm/v/%40bramus%2Fstyle-observer)
-![npm bundle size](https://img.shields.io/bundlejs/size/%40bramus/style-observer)
-![NPM](https://img.shields.io/npm/l/%40bramus/style-observer)
+[![npm](https://img.shields.io/npm/v/%40bramus%2Fstyle-observer)](https://www.npmjs.com/package/@bramus/style-observer)
+[![npm bundle size](https://img.shields.io/bundlejs/size/%40bramus/style-observer)](https://bundlejs.com/?q=%40bramus%2Fstyle-observer)
+[![NPM](https://img.shields.io/npm/l/%40bramus/style-observer)](./LICENSE)
 [![Demo](https://img.shields.io/badge/demo-_CodePen-hotpink)](https://codepen.io/bramus/pen/WNqKqxj?editors=1111)
 
-## Style Observer?
+## CSS Style Observer?
 
-While [`MutationObserver`](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver) can track DOM changes, it cannot be used to track style changes. This library plugs that gap and allows you to set up an observer tracking changes in computed values of CSS Properties.
+While [`MutationObserver`](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver) can track DOM changes, it cannot be used to track style changes. This library plugs that gap and allows you to set up an observer that notifies you when the computed value of a tracked CSS property has changed.
 
 The main use case for this library is to track changes to [CSS Custom Properties](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties) _(aka CSS Variables)_ but it can be used for other properties as well.
 
