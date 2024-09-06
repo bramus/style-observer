@@ -7,6 +7,11 @@
       inherits: true;
       initial-value: 0;
     }
+    @property --variable2 {
+      syntax: "<custom-ident>";
+      inherits: true;
+      initial-value: the-initial-value;
+    }
 
     :root {
       --variable1: 0.5;
@@ -19,7 +24,7 @@
 </head>
 <body>
 <button onclick="randomValue('--variable1')"><code>--variable1: &lt;random number&gt;</code></button>
-<button onclick="randomString('--variable2')"><code>--variable2: &lt;random string&gt;</code></button>
+<button onclick="randomString('--variable2')"><code>--variable2: &lt;random ident&gt;</code></button>
 <button onclick="toggleDisplay()">Toggle <code>display</code></button>
 <button onclick="toggleBorder()">Toggle <code>border-width</code></button>
 <button onclick="detachObserver()">Detach observer</button>
@@ -53,7 +58,7 @@
       borderIsToggled = !borderIsToggled;
     }
     window.randomValue = (variable) => document.documentElement.style.setProperty(variable, Math.random());
-    window.randomString = (variable) => document.documentElement.style.setProperty(variable, window.crypto.randomUUID());
+    window.randomString = (variable) => document.documentElement.style.setProperty(variable, 'rand-' + window.crypto.randomUUID());
     window.toggleBodyClass = (className) => document.body.classList.toggle(className);
     window.detachObserver = () => { cssStyleObserver.detach(); document.querySelector('#result').textContent = ''; };
     window.attachObserver = () => cssStyleObserver.attach(document.body);
