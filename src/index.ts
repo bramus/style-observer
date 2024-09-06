@@ -20,6 +20,13 @@ export type CSSStyleObserverCallback = (
 ) => void;
 
 /**
+ * Options for configuring the CSSStyleObserver
+ */
+export interface CSSStyleObserverOptions {
+  observeAllProperties?: boolean;
+}
+
+/**
  * Passive observer for CSS properties. Instead of typical polling approach, it uses CSS
  * transitions to detect changes.
  *
@@ -37,15 +44,18 @@ export class CSSStyleObserver {
    *
    * @param observedVariables list of CSS variables to observe
    * @param callback callback that will be invoked every time any of listed CSS variables change
+   * @param options configuration options
    */
   constructor(
     observedVariables: string[],
-    callback: CSSStyleObserverCallback
+    callback: CSSStyleObserverCallback,
+    options: CSSStyleObserverOptions = {}
   ) {
     this._observedVariables = observedVariables;
     this._callback = callback;
     this._targetElement = null;
     this._cachedValues = {};
+    this._observeAllProperties = options.observeAllProperties ?? false;
   }
 
   /**
@@ -98,6 +108,11 @@ export class CSSStyleObserver {
    */
   private _cachedValues: { [key: string]: string };
 
+  /*
+   * Flag to determine whether to observe all properties or only the changed ones
+   */
+  private _observeAllProperties: boolean;
+
   /**
    * Attach the styles necessary to track the changes to the given element
    * 
@@ -137,7 +152,7 @@ export class CSSStyleObserver {
         const currentValue = computedStyle.getPropertyValue(propertyName);
         const previousValue = this._cachedValues[propertyName] || '';
 
-        if (currentValue !== previousValue) {
+        if (this._observeAllProperties || currentValue !== previousValue) {
           changedProperties[propertyName] = currentValue;
           this._cachedValues[propertyName] = currentValue;
         }
