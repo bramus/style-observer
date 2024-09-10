@@ -28,10 +28,10 @@ npm install @bramus/style-observer
 const CSSStyleObserver = require('@bramus/style-observer');
 
 // Vanilla JS (ES6)
-import CSSStyleObserver from '@bramus/style-observer';
+import CSSStyleObserver, { NotificationMode } from '@bramus/style-observer';
 
 // TypeScript
-import CSSStyleObserver from '@bramus/style-observer/src/index.ts'
+import CSSStyleObserver, { NotificationMode } from '@bramus/style-observer/src/index.ts'
 
 const cssStyleObserver = new CSSStyleObserver(
     /* CSS Properties to observe */
@@ -43,7 +43,7 @@ const cssStyleObserver = new CSSStyleObserver(
     },                                                 
     /* Configuration options */
     {
-      observeAllProperties?: boolean
+      notificationMode?: NotificationMode.INDIVIDUAL
     }
 );
 
@@ -56,7 +56,7 @@ cssStyleObserver.detach();               /* Detach observer */
 
 ### Configuration options
 
-* observeAllProperties (boolean, default: false): Flag to determine whether to observe all properties or only the changed ones
+* notificationMode (NotificationMode, default: INDIVIDUAL): Determines whether to observe and return all properties (ALL) or only the changed ones (INDIVIDUAL)
 
 Try out a demo on CodePen: [https://codepen.io/bramus/pen/WNqKqxj](https://codepen.io/bramus/pen/WNqKqxj?editors=1111)
 
