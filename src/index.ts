@@ -20,10 +20,18 @@ export type CSSStyleObserverCallback = (
 ) => void;
 
 /**
+ * Enum for callback modes
+ */
+export enum NotificationMode {
+  INDIVIDUAL = 'individual',
+  ALL = 'all',
+}
+
+/**
  * Options for configuring the CSSStyleObserver
  */
 export interface CSSStyleObserverOptions {
-  observeAllProperties?: boolean;
+  notificationMode?: NotificationMode;
 }
 
 /**
@@ -55,7 +63,7 @@ export class CSSStyleObserver {
     this._callback = callback;
     this._targetElement = null;
     this._cachedValues = {};
-    this._observeAllProperties = options.observeAllProperties ?? false;
+    this._notificationMode = options.notificationMode ?? NotificationMode.INDIVIDUAL;
   }
 
   /**
@@ -109,9 +117,9 @@ export class CSSStyleObserver {
   private _cachedValues: { [key: string]: string };
 
   /*
-   * Flag to determine whether to observe all properties or only the changed ones
+   * Mode to determine whether to observe all properties or only the changed ones
    */
-  private _observeAllProperties: boolean;
+  private _notificationMode: NotificationMode;
 
   /**
    * Attach the styles necessary to track the changes to the given element
@@ -152,7 +160,7 @@ export class CSSStyleObserver {
         const currentValue = computedStyle.getPropertyValue(propertyName);
         const previousValue = this._cachedValues[propertyName] || '';
 
-        if (this._observeAllProperties || currentValue !== previousValue) {
+        if (this._notificationMode === NotificationMode.ALL || currentValue !== previousValue) {
           changedProperties[propertyName] = currentValue;
           this._cachedValues[propertyName] = currentValue;
         }
