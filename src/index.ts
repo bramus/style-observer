@@ -63,7 +63,7 @@ export class CSSStyleObserver {
     this._callback = callback;
     this._targetElement = null;
     this._cachedValues = {};
-    this._notificationMode = options.notificationMode ?? NotificationMode.INDIVIDUAL;
+    this._notificationMode = options.notificationMode ?? NotificationMode.CHANGED_ONLY;
   }
 
   /**
