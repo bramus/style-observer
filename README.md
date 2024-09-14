@@ -43,7 +43,7 @@ const cssStyleObserver = new CSSStyleObserver(
     },                                                 
     /* Configuration options */
     {
-      notificationMode?: NotificationMode.INDIVIDUAL
+      notificationMode?: NotificationMode.CHANGED_ONLY
     }
 );
 
