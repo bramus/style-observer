@@ -23,7 +23,7 @@ export type CSSStyleObserverCallback = (
  * Enum for callback modes
  */
 export enum NotificationMode {
-  INDIVIDUAL = 'individual',
+  CHANGED_ONLY = 'changed_only',
   ALL = 'all',
 }
 
