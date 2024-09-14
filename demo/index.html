@@ -23,7 +23,7 @@
   </style>
 </head>
 <body>
-<button onclick="randomValue('--variable1')"><code>--variable1: &lt;random number&gt;</code></button>
+<button onclick="randomValue('--variable1'); randomString('--variable2')"><code>--variable1: &lt;random number&gt;</code></button>
 <button onclick="randomString('--variable2')"><code>--variable2: &lt;random ident&gt;</code></button>
 <button onclick="toggleDisplay()">Toggle <code>display</code></button>
 <button onclick="toggleBorder()">Toggle <code>border-width</code></button>
@@ -33,12 +33,17 @@
 <pre id="result"></pre>
 
 <script type="module">
-    import CSSStyleObserver from '../dist/style-observer.esm.js';
+    import CSSStyleObserver, { NotificationMode } from '../dist/style-observer.esm.js';
 
-    const cssStyleObserver = new CSSStyleObserver(['--variable1', '--variable2', 'display', 'border-width'],
-        (variables) => {
-            document.querySelector('#result').textContent = Object.entries(variables).map(value => `${value[0]} = ${value[1]}`).join('\n');
-        });
+    const cssStyleObserver = new CSSStyleObserver(
+      ['--variable1', '--variable2', 'display', 'border-width'],
+      (variables) => {
+          document.querySelector('#result').textContent = Object.entries(variables).map(value => `${value[0]} = ${value[1]}`).join('\n');
+      },
+      {
+        notificationMode: NotificationMode.CHANGED_ONLY,
+      }
+    );
     cssStyleObserver.attach(document.body);
 
     window.toggleDisplay = () => {
