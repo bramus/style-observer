@@ -28,10 +28,10 @@ npm install @bramus/style-observer
 const CSSStyleObserver = require('@bramus/style-observer');
 
 // Vanilla JS (ES6)
-import CSSStyleObserver from '@bramus/style-observer';
+import CSSStyleObserver, { NotificationMode } from '@bramus/style-observer';
 
 // TypeScript
-import CSSStyleObserver from '@bramus/style-observer/src/index.ts'
+import CSSStyleObserver, { NotificationMode } from '@bramus/style-observer/src/index.ts'
 
 const cssStyleObserver = new CSSStyleObserver(
     /* CSS Properties to observe */
@@ -40,7 +40,11 @@ const cssStyleObserver = new CSSStyleObserver(
     /* This is called whenever there are changes */
     (values) => {
         console.log(values['--variable1'], values['--variable2'], values['display']);
-    }                               
+    },                                                 
+    /* Configuration options */
+    {
+      notificationMode?: NotificationMode.CHANGED_ONLY
+    }
 );
 
 cssStyleObserver.attach(document.body);  /* Attach observer to `document.body` */
@@ -49,6 +53,10 @@ cssStyleObserver.attach(document.body);  /* Attach observer to `document.body` *
 
 cssStyleObserver.detach();               /* Detach observer */
 ```
+
+### Configuration options
+
+* `notificationMode` (`NotificationMode`, default: `CHANGED_ONLY`): Determines whether to pass all properties (`ALL`) or only the changed ones (`CHANGED_ONLY`) into the callback
 
 Try out a demo on CodePen: [https://codepen.io/bramus/pen/WNqKqxj](https://codepen.io/bramus/pen/WNqKqxj?editors=1111)
 
