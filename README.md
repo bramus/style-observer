@@ -56,7 +56,7 @@ cssStyleObserver.detach();               /* Detach observer */
 
 ### Configuration options
 
-* notificationMode (NotificationMode, default: INDIVIDUAL): Determines whether to observe and return all properties (ALL) or only the changed ones (INDIVIDUAL)
+* `notificationMode` (`NotificationMode`, default: `CHANGED_ONLY`): Determines whether to pass all properties (`ALL`) or only the changed ones (`CHANGED_ONLY`) into the callback
 
 Try out a demo on CodePen: [https://codepen.io/bramus/pen/WNqKqxj](https://codepen.io/bramus/pen/WNqKqxj?editors=1111)
 
