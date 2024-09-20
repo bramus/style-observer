@@ -66,16 +66,16 @@ cssStyleObserver.detach();               /* Detach observer */
         "display": "block"
     }
     ```
-  * `OBJECT`: The callback receives an array of objects containing detailed information about each property:
+  * `OBJECT`: The callback receives an object with property names as keys and detailed information as values:
     ```js
-    [
-        {
+    {
+        "--my-variable":{
             "propertyName": "--my-variable",
             "value": "1.0",
             "previousValue": "0.0",
             "changed": true
         }
-    ]
+    }
     ```
 
 Try out a demo on CodePen: [https://codepen.io/bramus/pen/WNqKqxj](https://codepen.io/bramus/pen/WNqKqxj?editors=1111)
