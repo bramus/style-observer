@@ -14,20 +14,20 @@ export type CSSDeclarations = { [key: string]: string };
  * Structure holding detailed CSS property information
  *
  * ```json
- * [
- *   {
+ * {
+ *   "--my-variable": {
  *     "propertyName": "--my-variable",
  *     "value": "1.0",
  *     "previousValue": "0.5",
  *     "changed": true
  *   },
- *   {
+ *   "display": {
  *     "propertyName": "display",
  *     "value": "flex",
  *     "previousValue": "flex",
  *     "changed": false
  *   }
- * ]
+ * }
  * ```
  */
 export interface CSSPropertyInfo {
@@ -43,7 +43,7 @@ export interface CSSPropertyInfo {
  * @param values Readonly structure containing observed CSS properties and their values
  */
 export type CSSStyleObserverCallback = (
-  values: Readonly<CSSDeclarations | CSSPropertyInfo[]>
+  values: Readonly<CSSDeclarations | { [key: string]: CSSPropertyInfo }>
 ) => void;
 
 /**
@@ -231,17 +231,17 @@ export class CSSStyleObserver {
       });
     },
     [ReturnFormat.OBJECT]: (computedStyle) => {
-      const changes: CSSPropertyInfo[] = [];
+      const changes: { [key: string]: CSSPropertyInfo } = {};
 
       this._processChanges(computedStyle, (propertyName, currentValue, previousValue, hasChanged) => {
-        changes.push({
+        changes[propertyName] = {
           propertyName,
           value: currentValue,
           previousValue,
           changed: hasChanged,
-        });
+        };
       }, () => {
-        if (changes.length > 0) {
+        if (Object.keys(changes).length > 0) {
           this._callback(changes);
         }
       });
