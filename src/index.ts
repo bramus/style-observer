@@ -16,7 +16,6 @@ export type CSSDeclarations = { [key: string]: string };
  * ```json
  * {
  *   "--my-variable": {
- *     "propertyName": "--my-variable",
  *     "value": "1.0",
  *     "previousValue": "0.5",
  *     "changed": true
