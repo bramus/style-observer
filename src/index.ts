@@ -232,7 +232,6 @@ export class CSSStyleObserver {
 
       this._processChanges(computedStyle, (propertyName, currentValue, previousValue, hasChanged) => {
         changes[propertyName] = {
-          propertyName,
           value: currentValue,
           previousValue,
           changed: hasChanged,
