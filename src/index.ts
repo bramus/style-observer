@@ -29,7 +29,6 @@ export type CSSDeclarations = { [key: string]: string };
  * ```
  */
 export interface CSSPropertyInfo {
-  propertyName: string;
   value: string;
   previousValue: string;
   changed: boolean;
