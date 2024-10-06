@@ -21,7 +21,6 @@ export type CSSDeclarations = { [key: string]: string };
  *     "changed": true
  *   },
  *   "display": {
- *     "propertyName": "display",
  *     "value": "flex",
  *     "previousValue": "flex",
  *     "changed": false
