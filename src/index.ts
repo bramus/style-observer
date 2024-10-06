@@ -191,56 +191,49 @@ export class CSSStyleObserver {
    *
    * @param computedStyle The computed style of the target element
    * @param processChange Function to process each changed property
-   * @param finalizeChanges Function to finalize and handle collected changes
+   * @returns Collected changes
    */
-  private _processChanges(
+  private _processObservedVariables<T>(
     computedStyle: CSSStyleDeclaration,
-    processChange: (propertyName: string, currentValue: string, previousValue: string, hasChanged: boolean) => void,
-    finalizeChanges: () => void
-  ) {
-      this._observedVariables.forEach((propertyName) => {
-        const currentValue = computedStyle.getPropertyValue(propertyName);
-        const previousValue = this._cachedValues[propertyName] || '';
-        const hasChanged = currentValue !== previousValue;
+    processChange: (propertyName: string, currentValue: string, previousValue: string, hasChanged: boolean) => T
+  ): T[] {
+    const changes: T[] = [];
+
+    this._observedVariables.forEach((propertyName) => {
+      const currentValue = computedStyle.getPropertyValue(propertyName);
+      const previousValue = this._cachedValues[propertyName] || '';
+      const hasChanged = currentValue !== previousValue;
 
       if (this._notificationMode === NotificationMode.ALL || hasChanged) {
-        processChange(propertyName, currentValue, previousValue, hasChanged);
+        changes.push(processChange(propertyName, currentValue, previousValue, hasChanged));
         this._cachedValues[propertyName] = currentValue;
       }
     });
 
-    finalizeChanges();
+    return changes;
   }
 
   /**
    * Handlers for return formats
    */
-  private _returnFormatHandlers: Record<ReturnFormat, (computedStyle: CSSStyleDeclaration) => void> = {
+  private _returnFormatHandlers: Record<ReturnFormat, (computedStyle: CSSStyleDeclaration) => CSSDeclarations | { [key: string]: CSSPropertyInfo }> = {
     [ReturnFormat.VALUE_ONLY]: (computedStyle) => {
-      const changes: CSSDeclarations = {};
+      const changes = this._processObservedVariables(computedStyle, (propertyName, currentValue) => ({
+        [propertyName]: currentValue
+      }));
 
-      this._processChanges(computedStyle, (propertyName, currentValue) => {
-        changes[propertyName] = currentValue;
-      }, () => {
-        if (Object.keys(changes).length > 0) {
-          this._callback(changes);
-        }
-      });
+      return Object.assign({}, ...changes);
     },
     [ReturnFormat.OBJECT]: (computedStyle) => {
-      const changes: { [key: string]: CSSPropertyInfo } = {};
-
-      this._processChanges(computedStyle, (propertyName, currentValue, previousValue, hasChanged) => {
-        changes[propertyName] = {
+      const changes = this._processObservedVariables(computedStyle, (propertyName, currentValue, previousValue, hasChanged) => ({
+        [propertyName]: {
           value: currentValue,
           previousValue,
           changed: hasChanged,
-        };
-      }, () => {
-        if (Object.keys(changes).length > 0) {
-          this._callback(changes);
-        }
-      });
+        },
+      }));
+
+      return Object.assign({}, ...changes);
     },
   };
 
@@ -253,7 +246,11 @@ export class CSSStyleObserver {
 
       // Execute the handler for the current return format, default to ReturnFormat.VALUE_ONLY if not valid
       const handler = this._returnFormatHandlers[this._returnFormat] ?? this._returnFormatHandlers[ReturnFormat.VALUE_ONLY];
-      handler(computedStyle);
+      const changes = handler(computedStyle);
+      
+      if (Object.keys(changes).length > 0) {
+        this._callback(changes);
+      }
     }
   }
 
