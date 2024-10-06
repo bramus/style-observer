@@ -70,7 +70,6 @@ cssStyleObserver.detach();               /* Detach observer */
     ```js
     {
         "--my-variable":{
-            "propertyName": "--my-variable",
             "value": "1.0",
             "previousValue": "0.0",
             "changed": true
