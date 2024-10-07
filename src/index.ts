@@ -244,12 +244,12 @@ export class CSSStyleObserver {
     if (this._targetElement) {
       const computedStyle = getComputedStyle(this._targetElement);
 
-      // Execute the handler for the current return format, default to ReturnFormat.VALUE_ONLY if not valid
-      const handler = this._returnFormatHandlers[this._returnFormat] ?? this._returnFormatHandlers[ReturnFormat.VALUE_ONLY];
-      const changes = handler(computedStyle);
+      const changes = this. _processObservedVariables(computedStyle);
+      if (Object.keys(changes).length == 0) return;
       
-      if (Object.keys(changes).length > 0) {
-        this._callback(changes);
+      const format = this._returnFormatHandlers[this._returnFormat] ?? this._returnFormatHandlers[ReturnFormat.VALUE_ONLY];
+      const formattedChanges = format(changes);
+      this._callback(formattedChanges);
       }
     }
   }
