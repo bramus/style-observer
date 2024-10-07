@@ -28,10 +28,10 @@ npm install @bramus/style-observer
 const CSSStyleObserver = require('@bramus/style-observer');
 
 // Vanilla JS (ES6)
-import CSSStyleObserver, { NotificationMode } from '@bramus/style-observer';
+import CSSStyleObserver, { NotificationMode, ReturnFormat } from '@bramus/style-observer';
 
 // TypeScript
-import CSSStyleObserver, { NotificationMode } from '@bramus/style-observer/src/index.ts'
+import CSSStyleObserver, { NotificationMode, ReturnFormat } from '@bramus/style-observer/src/index.ts'
 
 const cssStyleObserver = new CSSStyleObserver(
     /* CSS Properties to observe */
@@ -43,7 +43,8 @@ const cssStyleObserver = new CSSStyleObserver(
     },                                                 
     /* Configuration options */
     {
-      notificationMode?: NotificationMode.CHANGED_ONLY
+      notificationMode?: NotificationMode.CHANGED_ONLY,
+      returnFormat?: ReturnFormat.VALUE_ONLY,
     }
 );
 
@@ -57,6 +58,24 @@ cssStyleObserver.detach();               /* Detach observer */
 ### Configuration options
 
 * `notificationMode` (`NotificationMode`, default: `CHANGED_ONLY`): Determines whether to pass all properties (`ALL`) or only the changed ones (`CHANGED_ONLY`) into the callback
+* `ReturnFormat` (`ReturnFormat`, default: `VALUE_ONLY`): Determines the format of the data passed to the callback. Below are the options:
+  * `VALUE_ONLY`: The callback receives an object with property names as keys and their current values:
+    ```js
+    {
+        "--my-variable": "1.0",
+        "display": "block"
+    }
+    ```
+  * `OBJECT`: The callback receives an object with property names as keys and detailed information as values:
+    ```js
+    {
+        "--my-variable":{
+            "value": "1.0",
+            "previousValue": "0.0",
+            "changed": true
+        }
+    }
+    ```
 
 Try out a demo on CodePen: [https://codepen.io/bramus/pen/WNqKqxj](https://codepen.io/bramus/pen/WNqKqxj?editors=1111)
 
