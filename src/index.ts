@@ -64,6 +64,12 @@ export type CSSStyleObserverCallback = (
 ) => void;
 
 /**
+ * Type signatur for a formatter.
+ * It is functoin that takes a set of StyleObserverChanges into CSSDeclarations
+ */
+type CSSStyleObserverFormatter = (changes: StyleObserverChanges) => CSSDeclarations;
+
+/**
  * Supported return formats
  */
 export enum ReturnFormat {
@@ -207,14 +213,12 @@ export class CSSStyleObserver {
   }
 
   /**
-   * Process observed variables and collect changes
+   * Process the computed style and collect the changes
    *
    * @param computedStyle The computed style of the target element
    * @returns Collected changes
    */
-  private _processObservedVariables(
-    computedStyle: CSSStyleDeclaration
-  ): StyleObserverChanges {
+  private _processComputedStyle(computedStyle: CSSStyleDeclaration): StyleObserverChanges {
     const changes: StyleObserverChanges = {};
 
     this._observedVariables.forEach(propertyName => {
@@ -236,17 +240,26 @@ export class CSSStyleObserver {
   }
 
   /**
-   * Handlers for return formats
+   * Returns the formatter to use
    */
-  private _returnFormatHandlers: Record<ReturnFormat, (changes: StyleObserverChanges) => CSSDeclarations> = {
-    [ReturnFormat.VALUE_ONLY]: (changes) => {
-      const formattedChanges: StyleObserverChangesValueOnly = {};
-      Object.keys(changes).forEach(key => {
-        formattedChanges[key] = changes[key].value;
-      });
-      return formattedChanges;
-    },
-    [ReturnFormat.OBJECT]: (changes) => changes,
+  private _getFormatter(format: ReturnFormat): CSSStyleObserverFormatter {
+
+    switch (format) {
+      case ReturnFormat.OBJECT:
+        return (changes) => {
+          return changes;
+        }
+
+      case ReturnFormat.VALUE_ONLY:
+      default:
+        return (changes) => {
+          const formattedChanges: StyleObserverChangesValueOnly = {};
+          Object.keys(changes).forEach(key => {
+            formattedChanges[key] = changes[key].value;
+          });
+          return formattedChanges;
+        }
+    }
   };
 
   /**
@@ -255,13 +268,12 @@ export class CSSStyleObserver {
   private _handleUpdate(): void {
     if (this._targetElement) {
       const computedStyle = getComputedStyle(this._targetElement);
-      const changes = this._processObservedVariables(computedStyle);
+      const changes = this._processComputedStyle(computedStyle);
 
       if (Object.keys(changes).length == 0) return;
 
-      const format = this._returnFormatHandlers[this._returnFormat] ?? this._returnFormatHandlers[ReturnFormat.VALUE_ONLY];
-      const formattedChanges = format(changes);
-      this._callback(formattedChanges);
+      const formatter = this._getFormatter(this._returnFormat);
+      this._callback(formatter(changes));
     }
   }
 }
