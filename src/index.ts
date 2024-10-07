@@ -17,7 +17,7 @@ interface StyleObserverChange {
 
 /**
  * Structure holding several Style Observer Changes.
- * 
+ *
  * ```json
  * {
  *   "--my-variable": {
@@ -34,13 +34,13 @@ interface StyleObserverChange {
  * ```
  */
 type StyleObserverChanges = {
-  [key: string]: StyleObserverChange
+  [key: string]: StyleObserverChange;
 };
 
 /**
  * Structure holding several Style Observer Changes
  * with only their value
- * 
+ *
  * ```json
  * {
  *   "--my-variable": "1.0",
@@ -49,10 +49,12 @@ type StyleObserverChanges = {
  * ```
  */
 type StyleObserverChangesValueOnly = {
-  [key: string]: string
+  [key: string]: string;
 };
 
-export type CSSDeclarations = StyleObserverChanges | StyleObserverChangesValueOnly;
+export type CSSDeclarations =
+  | StyleObserverChanges
+  | StyleObserverChangesValueOnly;
 
 /**
  * Type signature of observer callback.
@@ -67,7 +69,9 @@ export type CSSStyleObserverCallback = (
  * Type signatur for a formatter.
  * It is functoin that takes a set of StyleObserverChanges into CSSDeclarations
  */
-type CSSStyleObserverFormatter = (changes: StyleObserverChanges) => CSSDeclarations;
+type CSSStyleObserverFormatter = (
+  changes: StyleObserverChanges
+) => CSSDeclarations;
 
 /**
  * Supported return formats
@@ -122,7 +126,8 @@ export class CSSStyleObserver {
     this._callback = callback;
     this._targetElement = null;
     this._cachedValues = {};
-    this._notificationMode = options.notificationMode ?? NotificationMode.CHANGED_ONLY;
+    this._notificationMode =
+      options.notificationMode ?? NotificationMode.CHANGED_ONLY;
     this._returnFormat = options.returnFormat ?? ReturnFormat.VALUE_ONLY;
   }
 
@@ -135,7 +140,10 @@ export class CSSStyleObserver {
     if (!this._targetElement) {
       this._targetElement = targetElement;
       this._setTargetElementStyles(this._targetElement);
-      this._targetElement.addEventListener('transitionstart', this._eventHandler);
+      this._targetElement.addEventListener(
+        'transitionstart',
+        this._eventHandler
+      );
       this._handleUpdate();
     }
   }
@@ -146,7 +154,10 @@ export class CSSStyleObserver {
   detach(): void {
     if (this._targetElement) {
       this._unsetTargetElementStyles(this._targetElement);
-      this._targetElement.removeEventListener('transitionstart', this._eventHandler);
+      this._targetElement.removeEventListener(
+        'transitionstart',
+        this._eventHandler
+      );
       this._targetElement = null;
     }
   }
@@ -188,7 +199,7 @@ export class CSSStyleObserver {
 
   /**
    * Attach the styles necessary to track the changes to the given element
-   * 
+   *
    * @param targetElement The element to track
    */
   private _setTargetElementStyles(targetElement: HTMLElement): void {
@@ -203,7 +214,7 @@ export class CSSStyleObserver {
 
   /**
    * Remove the styles that track the property changes
-   * 
+   *
    * @param targetElement The element to track
    */
   private _unsetTargetElementStyles(targetElement: HTMLElement): void {
@@ -218,7 +229,9 @@ export class CSSStyleObserver {
    * @param computedStyle The computed style of the target element
    * @returns Collected changes
    */
-  private _processComputedStyle(computedStyle: CSSStyleDeclaration): StyleObserverChanges {
+  private _processComputedStyle(
+    computedStyle: CSSStyleDeclaration
+  ): StyleObserverChanges {
     const changes: StyleObserverChanges = {};
 
     this._observedVariables.forEach(propertyName => {
@@ -243,24 +256,23 @@ export class CSSStyleObserver {
    * Returns the formatter to use
    */
   private _getFormatter(format: ReturnFormat): CSSStyleObserverFormatter {
-
     switch (format) {
       case ReturnFormat.OBJECT:
-        return (changes) => {
+        return changes => {
           return changes;
-        }
+        };
 
       case ReturnFormat.VALUE_ONLY:
       default:
-        return (changes) => {
+        return changes => {
           const formattedChanges: StyleObserverChangesValueOnly = {};
           Object.keys(changes).forEach(key => {
             formattedChanges[key] = changes[key].value;
           });
           return formattedChanges;
-        }
+        };
     }
-  };
+  }
 
   /**
    * Collect CSS variable values and invoke callback.
@@ -270,7 +282,7 @@ export class CSSStyleObserver {
       const computedStyle = getComputedStyle(this._targetElement);
       const changes = this._processComputedStyle(computedStyle);
 
-      if (Object.keys(changes).length == 0) return;
+      if (Object.keys(changes).length === 0) return;
 
       const formatter = this._getFormatter(this._returnFormat);
       this._callback(formatter(changes));
