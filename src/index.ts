@@ -1,18 +1,23 @@
 /**
- * Structure holding CSS computed values. Example:
+ * Structure representing a single Style Observer Change
  *
  * ```json
  * {
- *     "--my-variable": "1.0",
- *     "display": "block"
+ *   "value": "1.0",
+ *   "previousValue": "0.5",
+ *   "changed": true
  * }
  * ```
  */
-export type CSSDeclarations = { [key: string]: string };
+interface StyleObserverChange {
+  value: string;
+  previousValue: string;
+  changed: boolean;
+}
 
 /**
- * Structure holding detailed CSS property information
- *
+ * Structure holding several Style Observer Changes.
+ * 
  * ```json
  * {
  *   "--my-variable": {
@@ -21,18 +26,33 @@ export type CSSDeclarations = { [key: string]: string };
  *     "changed": true
  *   },
  *   "display": {
- *     "value": "flex",
- *     "previousValue": "flex",
+ *     "value": "block",
+ *     "previousValue": "block",
  *     "changed": false
  *   }
  * }
  * ```
  */
-export interface CSSPropertyInfo {
-  value: string;
-  previousValue: string;
-  changed: boolean;
-}
+type StyleObserverChanges = {
+  [key: string]: StyleObserverChange
+};
+
+/**
+ * Structure holding several Style Observer Changes
+ * with only their value
+ * 
+ * ```json
+ * {
+ *   "--my-variable": "1.0",
+ *   "display": "block",
+ * }
+ * ```
+ */
+type StyleObserverChangesValueOnly = {
+  [key: string]: string
+};
+
+export type CSSDeclarations = StyleObserverChanges | StyleObserverChangesValueOnly;
 
 /**
  * Type signature of observer callback.
@@ -40,11 +60,11 @@ export interface CSSPropertyInfo {
  * @param values Readonly structure containing observed CSS properties and their values
  */
 export type CSSStyleObserverCallback = (
-  values: Readonly<CSSDeclarations | { [key: string]: CSSPropertyInfo }>
+  values: Readonly<CSSDeclarations>
 ) => void;
 
 /**
- * Enum for return format options.
+ * Supported return formats
  */
 export enum ReturnFormat {
   VALUE_ONLY = 'value_only',
@@ -52,7 +72,7 @@ export enum ReturnFormat {
 }
 
 /**
- * Enum for callback modes
+ * Possible notification modes
  */
 export enum NotificationMode {
   CHANGED_ONLY = 'changed_only',
@@ -194,8 +214,8 @@ export class CSSStyleObserver {
    */
   private _processObservedVariables(
     computedStyle: CSSStyleDeclaration
-  ): { [key: string]: CSSPropertyInfo } | CSSDeclarations {
-    const changes: { [key: string]: CSSPropertyInfo } | CSSDeclarations = {};
+  ): StyleObserverChanges {
+    const changes: StyleObserverChanges = {};
 
     this._observedVariables.forEach(propertyName => {
       const currentValue = computedStyle.getPropertyValue(propertyName);
@@ -218,15 +238,15 @@ export class CSSStyleObserver {
   /**
    * Handlers for return formats
    */
-  private _returnFormatHandlers: Record<ReturnFormat, (changes: { [key: string]: CSSPropertyInfo } | CSSDeclarations) => CSSDeclarations | { [key: string]: CSSPropertyInfo }> = {
+  private _returnFormatHandlers: Record<ReturnFormat, (changes: StyleObserverChanges) => CSSDeclarations> = {
     [ReturnFormat.VALUE_ONLY]: (changes) => {
-      const formattedChanges: CSSDeclarations = {};
+      const formattedChanges: StyleObserverChangesValueOnly = {};
       Object.keys(changes).forEach(key => {
-        formattedChanges[key] = (changes as { [key: string]: CSSPropertyInfo })[key].value;
+        formattedChanges[key] = changes[key].value;
       });
       return formattedChanges;
     },
-    [ReturnFormat.OBJECT]: (changes) => changes as { [key: string]: CSSPropertyInfo },
+    [ReturnFormat.OBJECT]: (changes) => changes,
   };
 
   /**
