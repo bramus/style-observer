@@ -17,6 +17,7 @@
     "start": "tsdx watch",
     "build": "tsdx build",
     "lint": "tsdx lint src",
+    "format": "tsdx lint src --fix",
     "prepublish": "npm run build"
   },
   "prettier": {
