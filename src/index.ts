@@ -1,11 +1,12 @@
 /**
  * Structure representing a single Style Observer Change
  *
- * ```json
+ * ```js
  * {
  *   "value": "1.0",
  *   "previousValue": "0.5",
- *   "changed": true
+ *   "changed": true,
+ *   "element": HTMLElement
  * }
  * ```
  */
@@ -13,22 +14,25 @@ interface StyleObserverChange {
   value: string;
   previousValue: string;
   changed: boolean;
+  element: HTMLElement;
 }
 
 /**
  * Structure holding several Style Observer Changes.
  *
- * ```json
+ * ```js
  * {
  *   "--my-variable": {
  *     "value": "1.0",
  *     "previousValue": "0.5",
- *     "changed": true
+ *     "changed": true,
+ *     "element": $element
  *   },
  *   "display": {
  *     "value": "block",
  *     "previousValue": "block",
- *     "changed": false
+ *     "changed": false,
+ *     "element": $element
  *   }
  * }
  * ```
@@ -67,11 +71,13 @@ export type CSSStyleObserverCallback = (
 
 /**
  * Type signatur for a formatter.
- * It is functoin that takes a set of StyleObserverChanges into CSSDeclarations
+ * It is function that turns a set of StyleObserverChanges into CSSDeclarations
  */
 type CSSStyleObserverFormatter = (
   changes: StyleObserverChanges
 ) => CSSDeclarations;
+
+type CachedValues = { [key: string]: string };
 
 /**
  * Supported return formats
@@ -110,6 +116,12 @@ export interface CSSStyleObserverOptions {
  * ```
  */
 export class CSSStyleObserver {
+  // List of elements that are being observed
+  _observedElements: Set<HTMLElement> = new Set();
+
+  // Value cache per observed element
+  _cachedValues: WeakMap<HTMLElement, CachedValues> = new WeakMap();
+
   /**
    * Create a new (detached) instance of CSS variable observer.
    *
@@ -124,8 +136,6 @@ export class CSSStyleObserver {
   ) {
     this._observedVariables = observedVariables;
     this._callback = callback;
-    this._targetElement = null;
-    this._cachedValues = {};
     this._notificationMode =
       options.notificationMode ?? NotificationMode.CHANGED_ONLY;
     this._returnFormat = options.returnFormat ?? ReturnFormat.VALUE_ONLY;
@@ -137,29 +147,49 @@ export class CSSStyleObserver {
    * @param targetElement target element
    */
   attach(targetElement: HTMLElement): void {
-    if (!this._targetElement) {
-      this._targetElement = targetElement;
-      this._setTargetElementStyles(this._targetElement);
-      this._targetElement.addEventListener(
-        'transitionstart',
-        this._eventHandler
-      );
-      this._handleUpdate();
+    if (!this._observedElements.has(targetElement)) {
+      this._observedElements.add(targetElement);
+      this._cachedValues.set(targetElement, {});
+
+      this._setTargetElementStyles(targetElement);
+      targetElement.addEventListener('transitionstart', this._eventHandler);
+
+      // Make sure cache is not empty
+      this._handleUpdate(targetElement);
     }
   }
 
   /**
-   * Detach observer.
+   * Detach observer from given targetElement
+   * If no argument is passed, then all are detached
    */
-  detach(): void {
-    if (this._targetElement) {
-      this._unsetTargetElementStyles(this._targetElement);
-      this._targetElement.removeEventListener(
+  detach(targetElement?: HTMLElement): void {
+    // Figure out which elements to unwatch
+    let elementsToUnwatch: Set<HTMLElement>;
+    if (targetElement) {
+      if (this._observedElements.has(targetElement)) {
+        elementsToUnwatch = new Set([targetElement]);
+      } else {
+        elementsToUnwatch = new Set();
+      }
+    } else {
+      elementsToUnwatch = this._observedElements;
+    }
+
+    // No elements to unwatch? Quit while you’re ahead
+    if (!elementsToUnwatch.size) return;
+
+    // Unwatch all that need unwatching
+    elementsToUnwatch.forEach(elementToUnwatch => {
+      this._unsetTargetElementStyles(elementToUnwatch);
+      elementToUnwatch.removeEventListener(
         'transitionstart',
         this._eventHandler
       );
-      this._targetElement = null;
-    }
+
+      this._observedElements.delete(elementToUnwatch);
+      this._cachedValues.delete(elementToUnwatch);
+    });
   }
 
   /*
@@ -176,16 +206,6 @@ export class CSSStyleObserver {
    * Event handler that is used to invoke callback.
    */
   private _eventHandler = this._handleUpdate.bind(this);
-
-  /*
-   * The element that is being observed
-   */
-  private _targetElement: HTMLElement | null;
-
-  /*
-   * Cache to store previous values of observed properties
-   */
-  private _cachedValues: { [key: string]: string };
 
   /*
    * Mode to determine whether to observe all properties or only the changed ones
@@ -230,13 +250,15 @@ export class CSSStyleObserver {
    * @returns Collected changes
    */
   private _processComputedStyle(
-    computedStyle: CSSStyleDeclaration
+    computedStyle: CSSStyleDeclaration,
+    targetElement: HTMLElement
   ): StyleObserverChanges {
     const changes: StyleObserverChanges = {};
+    const cachedValuesForElement = this._cachedValues.get(targetElement) ?? {};
 
     this._observedVariables.forEach(propertyName => {
       const currentValue = computedStyle.getPropertyValue(propertyName);
-      const previousValue = this._cachedValues[propertyName] || '';
+      const previousValue = cachedValuesForElement[propertyName];
       const hasChanged = currentValue !== previousValue;
 
       if (this._notificationMode === NotificationMode.ALL || hasChanged) {
@@ -244,8 +266,9 @@ export class CSSStyleObserver {
           value: currentValue,
           previousValue,
           changed: hasChanged,
+          element: targetElement,
         };
-        this._cachedValues[propertyName] = currentValue;
+        cachedValuesForElement[propertyName] = currentValue;
       }
     });
 
@@ -277,10 +300,13 @@ export class CSSStyleObserver {
   /**
    * Collect CSS variable values and invoke callback.
    */
-  private _handleUpdate(): void {
-    if (this._targetElement) {
-      const computedStyle = getComputedStyle(this._targetElement);
-      const changes = this._processComputedStyle(computedStyle);
+  private _handleUpdate(e: TransitionEvent | HTMLElement): void {
+    const targetElement =
+      e instanceof HTMLElement ? e : (e.target as HTMLElement);
+
+    if (this._observedElements.has(targetElement)) {
+      const computedStyle = getComputedStyle(targetElement);
+      const changes = this._processComputedStyle(computedStyle, targetElement);
 
       if (Object.keys(changes).length === 0) return;
 

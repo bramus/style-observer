@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    @property --var {
+      syntax: "<number>";
+      inherits: true;
+      initial-value: 0;
+    }
+    @property --var2 {
+      syntax: "<number>";
+      inherits: true;
+      initial-value: 0;
+    }
+    :root {
+      --var: 0.500000;
+      font-family: 'Courier New', Courier, monospace;
+    }
+    button {
+      font-family: inherit;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+<button id="button1">--var = 0.500000</button>
+<button id="button2">--var = 0.500000</button>
+<button onclick="attachObserver1()">Attach observer 1</button>
+<button onclick="attachObserver2()">Attach observer 2</button>
+<button onclick="detachObserver1()">Detach observer 1</button>
+<button onclick="detachObserver2()">Detach observer 2</button>
+<button onclick="detachObservers()">Detach all observers</button>
+<button onclick="clearLog()">Clear Log</button>
+
+<pre id="result"></pre>
+
+<script type="module">
+    import CSSStyleObserver, { NotificationMode, ReturnFormat } from '../dist/style-observer.esm.js';
+
+    const log = (message) => {
+      console.log(message);
+      document.querySelector('#result').textContent += `\n${message}`;
+    }
+
+    const cssStyleObserver = new CSSStyleObserver(
+      ['--var', '--var2'],
+      (changes) => {
+        Object.entries(changes).map(([property, change]) => {
+          log(`${change.element.id}’s ${property} changed from ${change.previousValue} to ${change.value}`);
+          if (property == '--var') {
+            change.element.innerText = `--var = ${change.value}`;
+          }
+        });
+      },
+      {
+        notificationMode: NotificationMode.CHANGED_ONLY,
+        returnFormat: ReturnFormat.OBJECT,
+      }
+    );
+    
+    document.querySelectorAll('button[id]').forEach($button => {
+      cssStyleObserver.attach($button);
+      log(`Attached observer to #${$button.id}`);
+
+      $button.addEventListener('click', (e) => {
+          e.preventDefault();
+          $button.style.setProperty('--var', Math.random());
+      });
+    });
+
+    window.detachObservers = () => { log('Detached all observers'); cssStyleObserver.detach(); }
+    window.attachObserver1 = () => { log('Attached observer to #button1'); cssStyleObserver.attach(button1); }
+    window.attachObserver2 = () => { log('Attached observer to #button2'); cssStyleObserver.attach(button2); }
+    window.detachObserver1 = () => { log('Detached observer from #button1'); cssStyleObserver.detach(button1); }
+    window.detachObserver2 = () => { log('Detached observer from #button2'); cssStyleObserver.detach(button2); }
+    window.clearLog = () => { document.querySelector('#result').textContent = ''; }
+</script>
+</body>
+</html>
