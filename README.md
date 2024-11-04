@@ -79,6 +79,25 @@ cssStyleObserver.detach();               /* Detach observer */
 
 Try out a demo on CodePen: [https://codepen.io/bramus/pen/WNqKqxj](https://codepen.io/bramus/pen/WNqKqxj?editors=1111)
 
+### Observing multiple elements
+
+One single `CSSStyleObserver` instance can be used to observer mutliple elements.
+
+```js
+const observer = new CSSStyleObserver(…);
+
+observer.attach(document.getElementById('mainbutton'));
+observer.attach(document.getElementById('otherbutton'));
+```
+
+To unobserve a single element, pass a reference to it in `CSSStyleObserver`’s `detach()`.
+
+```js
+observer.detach(document.getElementById('mainbutton'));
+```
+
+When passing no argument in `detach()`, the observer will unobserve _all_ observed elements.
+
 ## Local Development
 
 Below is a list of commands you will probably find useful.
