@@ -181,7 +181,7 @@ export class StyleObserver {
     if (!elementsToUnobserve.size) return;
 
     // Unwatch all that need unwatching
-    elementsToUnobserve.forEach(elementToUnobserve => {
+    elementsToUnobserve.forEach((elementToUnobserve) => {
       this._unsetTargetElementStyles(elementToUnobserve);
       elementToUnobserve.removeEventListener(
         'transitionstart',
@@ -225,7 +225,7 @@ export class StyleObserver {
    */
   private _setTargetElementStyles(targetElement: HTMLElement): void {
     const cssTransitionValue = this._observedVariables
-      .map(value => `${value} 0.001ms step-start`)
+      .map((value) => `${value} 0.001ms step-start`)
       .join(', ');
 
     // @TODO: Don’t overwrite the existing transition
@@ -257,7 +257,7 @@ export class StyleObserver {
     const changes: StyleObserverChangesWithObjects = {};
     const cachedValuesForElement = this._cachedValues.get(targetElement) ?? {};
 
-    this._observedVariables.forEach(propertyName => {
+    this._observedVariables.forEach((propertyName) => {
       const currentValue = computedStyle.getPropertyValue(propertyName);
       const previousValue = cachedValuesForElement[propertyName];
       const hasChanged = currentValue !== previousValue;
@@ -282,15 +282,15 @@ export class StyleObserver {
   private _getFormatter(format: ReturnFormat): StyleObserverFormatter {
     switch (format) {
       case ReturnFormat.OBJECT:
-        return changes => {
+        return (changes) => {
           return changes;
         };
 
       case ReturnFormat.VALUE_ONLY:
       default:
-        return changes => {
+        return (changes) => {
           const formattedChanges: StyleObserverChangesWithValues = {};
-          Object.keys(changes).forEach(key => {
+          Object.keys(changes).forEach((key) => {
             formattedChanges[key] = changes[key].value;
           });
           return formattedChanges;

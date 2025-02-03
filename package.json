@@ -9,15 +9,15 @@
     "src"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
   },
   "scripts": {
     "demo": "concurrently \"npm:start\" \"npm:serve\"",
     "serve": "http-server -o /demo/",
-    "start": "tsdx watch",
-    "build": "tsdx build",
-    "lint": "tsdx lint src",
-    "format": "tsdx lint src --fix",
+    "start": "tsc --watch",
+    "build": "tsc",
+    "lint": "eslint",
+    "format": "eslint --fix",
     "prepublish": "npm run build"
   },
   "prettier": {
@@ -27,14 +27,17 @@
     "trailingComma": "es5"
   },
   "author": "Bramus",
-  "module": "dist/style-observer.esm.js",
+  "module": "dist/index.js",
   "devDependencies": {
+    "@eslint/js": "^9.19.0",
     "concurrently": "^8.2.2",
+    "eslint": "^9.19.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-prettier": "^5.2.3",
     "http-server": "^14.1.1",
     "husky": "^9.1.5",
-    "tsdx": "^0.14.1",
-    "tslib": "^2.7.0",
-    "typescript": "^5.5.4"
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.22.0"
   },
   "bugs": {
     "url": "https://github.com/bramus/style-observer/issues"
