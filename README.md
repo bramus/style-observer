@@ -104,7 +104,6 @@ Runs the project in development/watch mode. Your project will be rebuilt upon ch
 ### `npm run build`
 
 Bundles the package to the `dist` folder.
-The package is optimized and bundled with Rollup into multiple formats (CommonJS, UMD, and ES Module).
 
 ## FAQ
 
