@@ -24,41 +24,32 @@ npm install @bramus/style-observer
 ## Usage
 
 ```js
-// Vanilla JS (CommonJS)
-const CSSStyleObserver = require('@bramus/style-observer');
+import StyleObserver, { NotificationMode, ReturnFormat } from '@bramus/style-observer';
 
-// Vanilla JS (ES6)
-import CSSStyleObserver, { NotificationMode, ReturnFormat } from '@bramus/style-observer';
-
-// TypeScript
-import CSSStyleObserver, { NotificationMode, ReturnFormat } from '@bramus/style-observer/src/index.ts'
-
-const cssStyleObserver = new CSSStyleObserver(
-    /* CSS Properties to observe */
-    ['--variable1', '--variable2', 'display', 'border-width'],
-
-    /* This is called whenever there are changes */
+const styleObserver = new StyleObserver(
+    /* The StyleObserver Callback. Gets called whenever one of the observed properties changes */
     (values) => {
-        console.log(values['--variable1'], values['--variable2'], values['display']);
+      console.log(values['--variable1'], values['--variable2'], values['display'], values['border-width']);
     },                                                 
-    /* Configuration options */
+    /* StyleObserver Configuration */
     {
-      notificationMode?: NotificationMode.CHANGED_ONLY,
-      returnFormat?: ReturnFormat.VALUE_ONLY,
+      properties: ['--variable1', '--variable2', 'display', 'border-width'],
+      returnFormat: ReturnFormat.VALUE_ONLY,
+      notificationMode: NotificationMode.ALL,
     }
 );
 
-cssStyleObserver.attach(document.body);  /* Attach observer to `document.body` */
+styleObserver.observe(document.body); // Start observing changes to `document.body`
 
-//...
+// …
 
-cssStyleObserver.detach();               /* Detach observer */
+styleObserver.unobserve(document.body); // Stop observing
 ```
 
 ### Configuration options
 
 * `notificationMode` (`NotificationMode`, default: `CHANGED_ONLY`): Determines whether to pass all properties (`ALL`) or only the changed ones (`CHANGED_ONLY`) into the callback
-* `ReturnFormat` (`ReturnFormat`, default: `VALUE_ONLY`): Determines the format of the data passed to the callback. Below are the options:
+* `ReturnFormat` (`ReturnFormat`, default: `OBJECT`): Determines the format of the data passed to the callback. Below are the options:
   * `VALUE_ONLY`: The callback receives an object with property names as keys and their current values:
     ```js
     {
@@ -81,22 +72,22 @@ Try out a demo on CodePen: [https://codepen.io/bramus/pen/WNqKqxj](https://codep
 
 ### Observing multiple elements
 
-One single `CSSStyleObserver` instance can be used to observer mutliple elements.
+One single `StyleObserver` instance can be used to observer mutliple elements.
 
 ```js
-const observer = new CSSStyleObserver(…);
+const observer = new StyleObserver(…);
 
-observer.attach(document.getElementById('mainbutton'));
-observer.attach(document.getElementById('otherbutton'));
+observer.observe(document.getElementById('mainbutton'));
+observer.observe(document.getElementById('otherbutton'));
 ```
 
-To unobserve a single element, pass a reference to it in `CSSStyleObserver`’s `detach()`.
+To unobserve a single element, pass a reference to it in `StyleObserver`’s `unobserve()`.
 
 ```js
-observer.detach(document.getElementById('mainbutton'));
+observer.unobserve(document.getElementById('mainbutton'));
 ```
 
-When passing no argument in `detach()`, the observer will unobserve _all_ observed elements.
+When passing no argument in `unobserve()`, the observer will unobserve _all_ observed elements.
 
 ## Local Development
 

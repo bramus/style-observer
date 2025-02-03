@@ -27,25 +27,25 @@
 <button onclick="randomString('--variable2')"><code>--variable2: &lt;random ident&gt;</code></button>
 <button onclick="toggleDisplay()">Toggle <code>display</code></button>
 <button onclick="toggleBorder()">Toggle <code>border-width</code></button>
-<button onclick="detachObserver()">Detach observer</button>
-<button onclick="attachObserver()">Attach observer</button>
+<button onclick="stopObserving()">Stop observing</button>
+<button onclick="startObserving()">Start observing</button>
 
 <pre id="result"></pre>
 
 <script type="module">
-    import CSSStyleObserver, { NotificationMode, ReturnFormat } from '../dist/style-observer.esm.js';
+    import StyleObserver, { NotificationMode, ReturnFormat } from '../dist/style-observer.esm.js';
 
-    const cssStyleObserver = new CSSStyleObserver(
-      ['--variable1', '--variable2', 'display', 'border-width'],
+    const styleObserver = new StyleObserver(
       (variables) => {
           document.querySelector('#result').textContent = Object.entries(variables).map(value => `${value[0]} = ${value[1].value}`).join('\n');
       },
       {
+        properties: ['--variable1', '--variable2', 'display', 'border-width'],
         notificationMode: NotificationMode.ALL,
         returnFormat: ReturnFormat.OBJECT,
       }
     );
-    cssStyleObserver.attach(document.body);
+    styleObserver.observe(document.body);
 
     window.toggleDisplay = () => {
       if (getComputedStyle(document.body).getPropertyValue('display') == 'block') {
@@ -66,8 +66,8 @@
     window.randomValue = (variable) => document.documentElement.style.setProperty(variable, Math.random());
     window.randomString = (variable) => document.documentElement.style.setProperty(variable, 'rand-' + window.crypto.randomUUID());
     window.toggleBodyClass = (className) => document.body.classList.toggle(className);
-    window.detachObserver = () => { cssStyleObserver.detach(); document.querySelector('#result').textContent = ''; };
-    window.attachObserver = () => cssStyleObserver.attach(document.body);
+    window.stopObserving = () => { styleObserver.unobserve(); document.querySelector('#result').textContent = ''; };
+    window.startObserving = () => styleObserver.observe(document.body);
 </script>
 </body>
 </html>

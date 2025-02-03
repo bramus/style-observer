@@ -25,25 +25,24 @@
 <body>
 <button id="button1">--var = 0.500000</button>
 <button id="button2">--var = 0.500000</button>
-<button onclick="attachObserver1()">Attach observer 1</button>
-<button onclick="attachObserver2()">Attach observer 2</button>
-<button onclick="detachObserver1()">Detach observer 1</button>
-<button onclick="detachObserver2()">Detach observer 2</button>
-<button onclick="detachObservers()">Detach all observers</button>
+<button onclick="startObserver1()">Start observer 1</button>
+<button onclick="startObserver2()">Start observer 2</button>
+<button onclick="stopObserver1()">Stop observer 1</button>
+<button onclick="stopObserver2()">Stop observer 2</button>
+<button onclick="stopObservers()">Stop all observers</button>
 <button onclick="clearLog()">Clear Log</button>
 
 <pre id="result"></pre>
 
 <script type="module">
-    import CSSStyleObserver, { NotificationMode, ReturnFormat } from '../dist/style-observer.esm.js';
+    import StyleObserver, { NotificationMode, ReturnFormat } from '../dist/style-observer.esm.js';
 
     const log = (message) => {
       console.log(message);
       document.querySelector('#result').textContent += `\n${message}`;
     }
 
-    const cssStyleObserver = new CSSStyleObserver(
-      ['--var', '--var2'],
+    const styleObserver = new StyleObserver(
       (changes) => {
         Object.entries(changes).map(([property, change]) => {
           log(`${change.element.id}’s ${property} changed from ${change.previousValue} to ${change.value}`);
@@ -53,14 +52,15 @@
         });
       },
       {
+        properties: ['--var', '--var2'],
         notificationMode: NotificationMode.CHANGED_ONLY,
         returnFormat: ReturnFormat.OBJECT,
       }
     );
     
     document.querySelectorAll('button[id]').forEach($button => {
-      cssStyleObserver.attach($button);
-      log(`Attached observer to #${$button.id}`);
+      styleObserver.observe($button);
+      log(`Started observer on #${$button.id}`);
 
       $button.addEventListener('click', (e) => {
           e.preventDefault();
@@ -68,11 +68,11 @@
       });
     });
 
-    window.detachObservers = () => { log('Detached all observers'); cssStyleObserver.detach(); }
-    window.attachObserver1 = () => { log('Attached observer to #button1'); cssStyleObserver.attach(button1); }
-    window.attachObserver2 = () => { log('Attached observer to #button2'); cssStyleObserver.attach(button2); }
-    window.detachObserver1 = () => { log('Detached observer from #button1'); cssStyleObserver.detach(button1); }
-    window.detachObserver2 = () => { log('Detached observer from #button2'); cssStyleObserver.detach(button2); }
+    window.stopObservers = () => { log('Stopped all observers'); styleObserver.unobserve(); }
+    window.startObserver1 = () => { log('Started observer on #button1'); styleObserver.observe(button1); }
+    window.startObserver2 = () => { log('Started observer on #button2'); styleObserver.observe(button2); }
+    window.stopObserver1 = () => { log('Stopped observer on #button1'); styleObserver.unobserve(button1); }
+    window.stopObserver2 = () => { log('Stopped observer on #button2'); styleObserver.unobserve(button2); }
     window.clearLog = () => { document.querySelector('#result').textContent = ''; }
 </script>
 </body>

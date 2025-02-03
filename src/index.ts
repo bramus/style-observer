@@ -10,7 +10,7 @@
  * }
  * ```
  */
-interface StyleObserverChange {
+interface StyleObserverChangeObject {
   value: string;
   previousValue: string;
   changed: boolean;
@@ -37,8 +37,8 @@ interface StyleObserverChange {
  * }
  * ```
  */
-type StyleObserverChanges = {
-  [key: string]: StyleObserverChange;
+type StyleObserverChangesWithObjects = {
+  [key: string]: StyleObserverChangeObject;
 };
 
 /**
@@ -52,30 +52,31 @@ type StyleObserverChanges = {
  * }
  * ```
  */
-type StyleObserverChangesValueOnly = {
-  [key: string]: string;
+type StyleObserverChangesWithValues = {
+  [key: string]: StyleObserverChangeValue;
 };
+type StyleObserverChangeValue = string;
 
-export type CSSDeclarations =
-  | StyleObserverChanges
-  | StyleObserverChangesValueOnly;
+export type StyleObserverChanges =
+  | StyleObserverChangesWithObjects
+  | StyleObserverChangesWithValues;
 
 /**
  * Type signature of observer callback.
  *
  * @param values Readonly structure containing observed CSS properties and their values
  */
-export type CSSStyleObserverCallback = (
-  values: Readonly<CSSDeclarations>
+export type StyleObserverCallback = (
+  values: Readonly<StyleObserverChanges>
 ) => void;
 
 /**
  * Type signatur for a formatter.
- * It is function that turns a set of StyleObserverChanges into CSSDeclarations
+ * It is function that turns a set of StyleObserverChangesWithObjects into StyleObserverChanges
  */
-type CSSStyleObserverFormatter = (
-  changes: StyleObserverChanges
-) => CSSDeclarations;
+type StyleObserverFormatter = (
+  changes: StyleObserverChangesWithObjects
+) => StyleObserverChanges;
 
 type CachedValues = { [key: string]: string };
 
@@ -96,9 +97,10 @@ export enum NotificationMode {
 }
 
 /**
- * Options for configuring the CSSStyleObserver
+ * Full configuration object
  */
-export interface CSSStyleObserverOptions {
+export interface StyleObserverConfig {
+  properties: string[];
   notificationMode?: NotificationMode;
   returnFormat?: ReturnFormat;
 }
@@ -107,15 +109,15 @@ export interface CSSStyleObserverOptions {
  * Passive observer for CSS properties. Instead of typical polling approach, it uses CSS
  * transitions to detect changes.
  *
- * CSSStyleObserver can be used to build dynamic theming system, detect media etc.
+ * StyleObserver can be used to build dynamic theming system, detect media etc.
  *
  * Usage:
  * ```javascript
- * const cssStyleObserver = new CSSStyleObserver(['--my-variable'], (variables) => console.log("Value:",variables['--my-variable']));
- * cssStyleObserver.attach(document.body);
+ * const styleObserver = new StyleObserver(['--my-variable'], (variables) => console.log("Value:",variables['--my-variable']));
+ * styleObserver.attach(document.body);
  * ```
  */
-export class CSSStyleObserver {
+export class StyleObserver {
   // List of elements that are being observed
   _observedElements: Set<HTMLElement> = new Set();
 
@@ -130,15 +132,14 @@ export class CSSStyleObserver {
    * @param options configuration options
    */
   constructor(
-    observedVariables: string[],
-    callback: CSSStyleObserverCallback,
-    options: CSSStyleObserverOptions = {}
+    callback: StyleObserverCallback,
+    config: StyleObserverConfig = { properties: [] }
   ) {
-    this._observedVariables = observedVariables;
     this._callback = callback;
+    this._observedVariables = config.properties;
     this._notificationMode =
-      options.notificationMode ?? NotificationMode.CHANGED_ONLY;
-    this._returnFormat = options.returnFormat ?? ReturnFormat.VALUE_ONLY;
+      config.notificationMode ?? NotificationMode.CHANGED_ONLY;
+    this._returnFormat = config.returnFormat ?? ReturnFormat.OBJECT;
   }
 
   /**
@@ -146,7 +147,7 @@ export class CSSStyleObserver {
    *
    * @param targetElement target element
    */
-  attach(targetElement: HTMLElement): void {
+  observe(targetElement: HTMLElement): void {
     if (!this._observedElements.has(targetElement)) {
       this._observedElements.add(targetElement);
       this._cachedValues.set(targetElement, {});
@@ -163,32 +164,32 @@ export class CSSStyleObserver {
    * Detach observer from given targetElement
    * If no argument is passed, then all are detached
    */
-  detach(targetElement?: HTMLElement): void {
+  unobserve(targetElement?: HTMLElement): void {
     // Figure out which elements to unwatch
-    let elementsToUnwatch: Set<HTMLElement>;
+    let elementsToUnobserve: Set<HTMLElement>;
     if (targetElement) {
       if (this._observedElements.has(targetElement)) {
-        elementsToUnwatch = new Set([targetElement]);
+        elementsToUnobserve = new Set([targetElement]);
       } else {
-        elementsToUnwatch = new Set();
+        elementsToUnobserve = new Set();
       }
     } else {
-      elementsToUnwatch = this._observedElements;
+      elementsToUnobserve = this._observedElements;
     }
 
     // No elements to unwatch? Quit while you’re ahead
-    if (!elementsToUnwatch.size) return;
+    if (!elementsToUnobserve.size) return;
 
     // Unwatch all that need unwatching
-    elementsToUnwatch.forEach(elementToUnwatch => {
-      this._unsetTargetElementStyles(elementToUnwatch);
-      elementToUnwatch.removeEventListener(
+    elementsToUnobserve.forEach(elementToUnobserve => {
+      this._unsetTargetElementStyles(elementToUnobserve);
+      elementToUnobserve.removeEventListener(
         'transitionstart',
         this._eventHandler
       );
 
-      this._observedElements.delete(elementToUnwatch);
-      this._cachedValues.delete(elementToUnwatch);
+      this._observedElements.delete(elementToUnobserve);
+      this._cachedValues.delete(elementToUnobserve);
     });
   }
 
@@ -200,7 +201,7 @@ export class CSSStyleObserver {
   /*
    * User supplied callback that receives CSS variable values.
    */
-  private _callback: CSSStyleObserverCallback;
+  private _callback: StyleObserverCallback;
 
   /*
    * Event handler that is used to invoke callback.
@@ -252,8 +253,8 @@ export class CSSStyleObserver {
   private _processComputedStyle(
     computedStyle: CSSStyleDeclaration,
     targetElement: HTMLElement
-  ): StyleObserverChanges {
-    const changes: StyleObserverChanges = {};
+  ): StyleObserverChangesWithObjects {
+    const changes: StyleObserverChangesWithObjects = {};
     const cachedValuesForElement = this._cachedValues.get(targetElement) ?? {};
 
     this._observedVariables.forEach(propertyName => {
@@ -278,7 +279,7 @@ export class CSSStyleObserver {
   /**
    * Returns the formatter to use
    */
-  private _getFormatter(format: ReturnFormat): CSSStyleObserverFormatter {
+  private _getFormatter(format: ReturnFormat): StyleObserverFormatter {
     switch (format) {
       case ReturnFormat.OBJECT:
         return changes => {
@@ -288,7 +289,7 @@ export class CSSStyleObserver {
       case ReturnFormat.VALUE_ONLY:
       default:
         return changes => {
-          const formattedChanges: StyleObserverChangesValueOnly = {};
+          const formattedChanges: StyleObserverChangesWithValues = {};
           Object.keys(changes).forEach(key => {
             formattedChanges[key] = changes[key].value;
           });
@@ -316,4 +317,4 @@ export class CSSStyleObserver {
   }
 }
 
-export default CSSStyleObserver;
+export default StyleObserver;
