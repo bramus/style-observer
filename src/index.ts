@@ -153,7 +153,7 @@ export class StyleObserver {
       this._cachedValues.set(targetElement, {});
 
       this._setTargetElementStyles(targetElement);
-      targetElement.addEventListener('transitionstart', this._eventHandler);
+      targetElement.addEventListener('transitionrun', this._eventHandler);
 
       // Make sure cache is not empty
       this._handleUpdate(targetElement);
@@ -184,7 +184,7 @@ export class StyleObserver {
     elementsToUnobserve.forEach((elementToUnobserve) => {
       this._unsetTargetElementStyles(elementToUnobserve);
       elementToUnobserve.removeEventListener(
-        'transitionstart',
+        'transitionrun',
         this._eventHandler
       );
 
