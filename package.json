@@ -9,7 +9,7 @@
     "src"
   ],
   "engines": {
-    "node": ">=12"
+    "node": ">=18"
   },
   "scripts": {
     "demo": "concurrently \"npm:start\" \"npm:serve\"",
