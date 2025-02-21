@@ -71,7 +71,7 @@ styleObserver.unobserve(document.body); // Stop observing
     }
     ```
 
-    In the first callback invocation, which gets triggered after starting to observer an element, the value for `previousValue` will be `undefined`. You can use this to filter out the first trigger.
+    In the first callback invocation, which gets triggered after starting to observe an element, the value for `previousValue` will be `undefined`. You can use this to filter out the first trigger.
 
 Try out a demo on CodePen: [https://codepen.io/bramus/pen/WNqKqxj](https://codepen.io/bramus/pen/WNqKqxj?editors=1111)
 
