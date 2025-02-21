@@ -12,7 +12,7 @@
  */
 interface StyleObserverChangeObject {
   value: string;
-  previousValue: string;
+  previousValue: string | undefined;
   changed: boolean;
   element: HTMLElement;
 }
