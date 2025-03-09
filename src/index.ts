@@ -124,6 +124,9 @@ export class StyleObserver {
   // Value cache per observed element
   _cachedValues: WeakMap<HTMLElement, CachedValues> = new WeakMap();
 
+  // Original transition values for given element
+  _originalTransitionValues: WeakMap<HTMLElement, string> = new WeakMap();
+
   /**
    * Create a new (detached) instance of CSS variable observer.
    *
@@ -224,12 +227,42 @@ export class StyleObserver {
    * @param targetElement The element to track
    */
   private _setTargetElementStyles(targetElement: HTMLElement): void {
-    const cssTransitionValue = this._observedVariables
+    const styles = window.getComputedStyle(targetElement);
+
+    // Keep track of the original value for `transition`
+    let originalTransitionValue = styles.getPropertyValue('transition');
+    if (originalTransitionValue == 'all') {
+      originalTransitionValue = '';
+    }
+    this._originalTransitionValues.set(targetElement, originalTransitionValue);
+
+    // Extract which properties are already part of `transition`
+    let originalTransitionPropertyValue = styles.getPropertyValue(
+      'transition-property'
+    );
+    if (originalTransitionPropertyValue == 'all') {
+      originalTransitionPropertyValue = '';
+    }
+    const originalTransitionPropertyValues = originalTransitionPropertyValue
+      .split(', ')
+      .map((value) => value.trim());
+
+    // Add transitions to the observed variables,
+    // but only if they are not being transitioned yet.
+    const styleObserverTransitionValue = this._observedVariables
+      .filter((value) => !originalTransitionPropertyValues.includes(value))
       .map((value) => `${value} 0.001ms step-start`)
       .join(', ');
 
-    // @TODO: Don’t overwrite the existing transition
-    targetElement.style.setProperty('transition', cssTransitionValue);
+    // Build new value for the `transition` property
+    const combinedTransitionValue = this._originalTransitionValues.get(
+      targetElement
+    )
+      ? `${originalTransitionValue}, ${styleObserverTransitionValue}`
+      : styleObserverTransitionValue;
+
+    // Write the styles
+    targetElement.style.setProperty('transition', combinedTransitionValue);
     targetElement.style.setProperty('transition-behavior', 'allow-discrete');
   }
 
@@ -239,8 +272,20 @@ export class StyleObserver {
    * @param targetElement The element to track
    */
   private _unsetTargetElementStyles(targetElement: HTMLElement): void {
-    // @TODO: Don’t remove all, only remove the tracked variables
-    targetElement.style.removeProperty('transition');
+    // Get the original value for `transition`
+    const originalTransitionValue =
+      this._originalTransitionValues.get(targetElement) ?? '';
+
+    // Restore the value (or remove the property if the value was empty)
+    if (originalTransitionValue != '') {
+      targetElement.style.setProperty('transition', originalTransitionValue);
+    } else {
+      targetElement.style.removeProperty('transition');
+    }
+
+    // Remove the explicitly added `transition-behavior: allow-discrete`
+    // It is OK to remove this standalone property because
+    // the original `transition` value already included this info per property
     targetElement.style.removeProperty('transition-behavior');
   }
 
